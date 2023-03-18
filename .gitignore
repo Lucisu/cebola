@@ -2,3 +2,5 @@ includes/cebola/vendor
 .vscode
 container/wp
 container/wp-data
+.env
+.DS_Store
