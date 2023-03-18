@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 php -c /etc/php/8.0/apache2/php.ini cebola -v 3 --plugin woocommerce --fresh
 
 docker ps
@@ -9,9 +10,6 @@ echo '<?php phpinfo();' > abc.php
 apt-get update && pecl install xdebug && docker-php-ext-enable xdebug && pecl install uopz && /etc/init.d/apache2 reload
 
 extension=uopz.so
-
-
-
 
 sudo chmod a+rwx -R FOLDER
 

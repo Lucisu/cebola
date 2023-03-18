@@ -5,3 +5,4 @@ container/db-data
 .vscode
 .env
 .DS_Store
+.idea

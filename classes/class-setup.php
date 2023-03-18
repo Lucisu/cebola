@@ -40,7 +40,7 @@ class Setup {
 
 		$this->maybe_install();
 
-		Logger::success( 'Running on https://localhost:8000 (user:admin, password:secret)' );
+		Logger::success( 'Running on http://localhost:8000 (user:admin, password:secret)' );
 	}
 
 	/**
