@@ -130,42 +130,9 @@ class Setup {
 		$this->environment->set_wp_debug( $this->args['wp-debug'] );
 		$this->environment->set_plugin( $this->args['plugin'] );
 		$this->database->install( $this->args['plugin'] );
-		$this->add_mu_plugin();
 		$this->send_requests();
 	}
-
-	/**
-	 * Adds the Must-Use plugin inside the proper folder.
-	 *
-	 * @return void
-	 */
-	private function add_mu_plugin() {
-
-		if ( file_exists( CEBOLA_WP_DIR. '/wp-content/mu-plugins/cebola-plugin.php' ) ) {
-			Logger::info( 'Cebola plugin already exists...' );
-			return;
-		}
-
-		Logger::info( 'Adding the Cebola plugin...' );
-
-		$file = file_get_contents( CEBOLA_DIR . '/includes/cebola-plugin.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		@mkdir( CEBOLA_WP_DIR. '/wp-content/mu-plugins' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions
-		@mkdir( CEBOLA_WP_DIR. '/wp-data/wp-content/mu-plugins/cebola' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions
-		file_put_contents( CEBOLA_WP_DIR. '/wp-content/mu-plugins/cebola-plugin.php', $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions
-
-		Logger::info( 'Copying Cebola directory...' );
-		$copy = $this->recursive_copy( CEBOLA_DIR . '/includes/cebola', CEBOLA_WP_DIR. '/wp-content/mu-plugins/cebola', true );
-		if ( ! $copy ) {
-			Logger::error( 'Failed to copy the MU plugin.' );
-		}
-
-		Logger::info( 'Running composer...' );
-		shell_exec( 'composer install -q --working-dir=' . CEBOLA_WP_DIR. '/wp-content/mu-plugins/cebola' );
-
-		if ( ! file_exists( CEBOLA_WP_DIR. '/wp-content/mu-plugins/cebola/composer.lock' ) ) {
-			Logger::error( 'Unable to run composer install.' );
-		}
-	}
+    
 
 	private function send_requests() {
 		Logger::info( 'Sending initial requests...' );
