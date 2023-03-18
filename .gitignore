@@ -1,2 +1,4 @@
 includes/cebola/vendor
 .vscode
+container/wp
+container/wp-data
