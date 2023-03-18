@@ -2,7 +2,6 @@ version: '3'
 
 services:
   wp:
-    user: "1000:1000"
     image: wordpress:latest
     ports:
       - ${IP}:8000:80
@@ -20,7 +19,6 @@ services:
       - db
 
   wpcli:
-    user: "1000:1000"
     image: wordpress:cli
     tty: true
     volumes:
