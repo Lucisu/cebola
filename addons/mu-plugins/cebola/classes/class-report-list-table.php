@@ -39,14 +39,6 @@ class Cebola_Functions_List_Table extends \WP_List_Table {
 	// Define sortable columns
 	public function get_sortable_columns() {
 		return array(
-			'id'        => array( 'id', false ),
-			'type'      => array( 'type', false ),
-			'hook'      => array( 'hook', false ),
-			'callback'  => array( 'callback', false ),
-			'priority'  => array( 'priority', false ),
-			'arguments' => array( 'arguments', false ),
-			'file'      => array( 'file', false ),
-			'line'      => array( 'line', false ),
 			'attention' => array( 'attention', false ),
 		);
 	}

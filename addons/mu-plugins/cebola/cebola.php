@@ -21,3 +21,25 @@ new Classes\Functions();
 new Classes\Injections();
 new Classes\Endpoints();
 new Classes\Admin_Menu();
+
+function admin_header() {
+	$page = ( isset( $_GET['page'] ) ) ? esc_attr( $_GET['page'] ) : false;
+	if ( 'cebola-functions-list' != $page ) {
+		return;
+	}
+
+	echo '<style type="text/css">';
+	echo '.wp-list-table .column-cb { width: 2%; }';
+	echo '.wp-list-table .column-id { width: 3%; }';
+	echo '.wp-list-table .column-type { width: 5%; }';
+	echo '.wp-list-table .column-hook { width: 10%; }';
+	echo '.wp-list-table .column-callback { width: 20%; }';
+	echo '.wp-list-table .column-priority { width: 5%; }';
+	echo '.wp-list-table .column-arguments { width: 5%; }';
+	echo '.wp-list-table .column-file { width: 20%; }';
+	echo '.wp-list-table .column-line { width: 5%; }';
+	echo '.wp-list-table .column-attention { width: 5%; }';
+	echo '</style>';
+}
+
+add_action( 'admin_head', __NAMESPACE__ . '\admin_header' );
