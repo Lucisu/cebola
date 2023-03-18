@@ -5,11 +5,9 @@ namespace Cebola\Classes;
 class Environment {
 
 	const CONTAINER_NAME = 'container-wp-1';
-	private $container   = array();
 	private $variables   = array();
 
 	public function set_container() {
-
 		$running = shell_exec( 'docker ps --filter "name=' . $this->sanitize_var( self::CONTAINER_NAME ) . '" --filter "status=running" --quiet' );
 
 		if ( empty( $running ) ) {
@@ -46,27 +44,25 @@ class Environment {
 			$this->variables[ $variable[0] ] = $variable[1];
 		}
 
-		$this->container = $info;
-
 		$this->set_constants();
 	}
 
 	public function stop_container() {
 		Logger::info( 'Stopping docker container...' );
 		echo "\n";
-		shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
+		shell_exec( 'sh ' . CEBOLA_CONTAINER_DIR . '/stop.sh' );
 	}
 
 	public function run_container() {
 		Logger::info( 'Starting docker container...' );
-		shell_exec( 'sh ' . CEBOLA_DIR . '/container/start.sh' );
+		shell_exec( 'sh ' . CEBOLA_CONTAINER_DIR . '/start.sh' );
 		sleep( 5 );
 		$this->set_container();
 	}
 
 	public function install_dependencies() {
 		Logger::info( 'Installing Dependencies...' );
-		shell_exec( 'docker exec -it --user root ' . $this->sanitize_var( self::CONTAINER_NAME ) . ' sh -cx "apt-get update && pecl install xdebug && docker-php-ext-enable xdebug && pecl install uopz && echo \'extension=uopz.so\' >> /usr/local/etc/php/conf.d/conf.ini && /etc/init.d/apache2 reload"' );
+		shell_exec( 'docker exec -it --user root ' . $this->sanitize_var( self::CONTAINER_NAME ) . ' sh -cx "apt-get update && pecl install xdebug && docker-php-ext-enable xdebug && pecl install uopz && /etc/init.d/apache2 reload"' );
 	}
 
 	public function set_wp_debug( bool $value ) {
