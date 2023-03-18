@@ -8,7 +8,7 @@ services:
       - ${IP}:8000:80
     volumes:
       - ./config/php.conf.ini:/usr/local/etc/php/conf.d/conf.ini
-      - ./wp:/var/www/html
+      - ./wp-data:/var/www/html
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_NAME: "${DB_NAME}"
@@ -25,7 +25,7 @@ services:
     tty: true
     volumes:
       - ./config/php.conf.ini:/usr/local/etc/php/conf.d/conf.ini
-      - ./wp:/var/www/html
+      - ./wp-data:/var/www/html
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_NAME: "${DB_NAME}"
@@ -65,8 +65,7 @@ services:
         '--collation-server=utf8mb4_unicode_ci'
     ]
     volumes:
-      - ./wp-data:/docker-entrypoint-initdb.d
-      - db_data:/var/lib/mysql
+      - ./db-data:/var/lib/mysql
     environment:
       MYSQL_DATABASE: "${DB_NAME}"
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
