@@ -17,3 +17,6 @@ You can login with:
 Run the cebola command
 ======================
 
+```bash
+./cebola --plugin plugin-slug
+```
