@@ -2,8 +2,7 @@ Installation
 ============
 
 ```bash
-cd ./includes/cebola
-composer install
+composer install --working-dir=addons/mu-plugins/cebola
 
 cd ./container/
 docker compose up
