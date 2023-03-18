@@ -1,0 +1,13 @@
+<?php
+namespace Cebola;
+
+define( 'CEBOLA_DIR', __DIR__ );
+
+function init_cebola() {
+	require CEBOLA_DIR . '/classes/class-logger.php';
+	require CEBOLA_DIR . '/classes/class-setup.php';
+	new Classes\Setup();
+}
+
+init_cebola();
+// echo shell_exec( 'docker exec container-wp-1 env' );
