@@ -74,7 +74,7 @@ class Environment {
 
 	public function set_plugin( string $plugin ) {
 		Logger::info( sprintf( 'Activating plugin %s...', $plugin ) );
-		shell_exec( 'docker exec -it container-wpcli-1 sh -cx "wp plugin install ' . $this->sanitize_var( $plugin ) . ' --activate"' );
+		$output = shell_exec( 'docker exec -it container-wpcli-1 sh -cx "wp plugin install ' . $plugin . ' --activate"' );
 	}
 
 	private function set_constants() {
