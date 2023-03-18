@@ -1,4 +1,3 @@
+composer install --working-dir=addons/mu-plugins/cebola
 cd container
-rm -Rf wp
-mkdir wp
 docker compose up -d
