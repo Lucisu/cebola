@@ -2,8 +2,7 @@ Installation
 ============
 
 ```bash
-cd ./includes/cebola
-composer install
+composer install --working-dir=addons/mu-plugins/cebola
 
 cd ./container/
 docker compose up
@@ -17,3 +16,9 @@ You can login with:
 Run the cebola command
 ======================
 
+```bash
+./cebola --plugin plugin-slug
+```
+This plugin can be the slug as writen on wordpress.org
+It can be a url to a zip file.
+Local zip files can ony work if you provide a valid path within the container.
