@@ -36,10 +36,8 @@ services:
       tail -f /dev/null
       '
     depends_on:
-      db:
-        condition: service_healthy
-      wp:
-        condition: service_started
+      - db
+      - wp
 
   pma:
     image: phpmyadmin/phpmyadmin
