@@ -16,29 +16,6 @@ We do that by creating a clean Wordpress instance, with the given plugin and add
 week points and issues from it.
 We do that by using Docker containers to have up the full needed infrastructure and applying our scripts
 
-##### Obtaining the installation (.exe) files
-
-1. Php  https://www.php.net/downloads.php
-2. Composer https://getcomposer.org/download/
-3. Docker dektop for Windows https://docs.docker.com/desktop/install/windows-install/
-
-##### Use Chocolatey
-
-###### Setup Chocolatey https://docs.chocolatey.org/en-us/choco/setup
-
-1. Install PHP
-``` 
-choco install php
-```
-
-Note: you may get the error that some packages are missing. In that case please find your .ini file
-
-By running the **Cebola scanner**, we are checking your plugins and themes provided in the command line and showing you
-some well known vulnerability nested there.
-We do that by creating a clean Wordpress instance, with the given plugin and adding our security expertise to get the
-week points and issues from it.
-We do that by using Docker containers to have up the full needed infrastructure and applying our scripts
-
 ***
 
 ## START RUNNING THE SCANNER
@@ -59,7 +36,7 @@ We do that by using Docker containers to have up the full needed infrastructure 
 
 ```
 sudo apt-get update 
-sudo apt-get upgrade
+sudo apt-get upgrade -y
 ```
 
 ####   
@@ -117,9 +94,21 @@ curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
 sudo php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
 ```
 
+Install other packages
+
+[Linux]
+
+sudo apt install php8.1-mysql
+apt-get install php8.1-curl
+
 ### Install Docker
 
 * Follow the instructions from the https://docs.docker.com/get-docker/
+
+[Linux]
+
+If you are running on another user the root, don't forget to add it to the docker permission group
+https://docs.docker.com/engine/install/linux-postinstall/
 
 ### Run the infrastructure
 
