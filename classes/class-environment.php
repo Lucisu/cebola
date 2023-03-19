@@ -57,9 +57,10 @@ class Environment {
 		
 		// making sure the code below runs on Windows
 		if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
-			shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
-		} else {
 			shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
+			
+		} else {
+			shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
 		}
 	}
 
@@ -68,9 +69,10 @@ class Environment {
 		
 		// making sure the code below runs on Windows
 		if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
-			shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
-		} else {
 			shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
+			
+		} else {
+			shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
 		}
 		sleep( 5 );
 		$this->set_container();
