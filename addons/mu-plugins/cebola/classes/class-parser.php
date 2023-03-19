@@ -21,15 +21,20 @@ class Parser {
 		$code            = "<?php\nclass CEBOLA {\n" . $code . '}';
 		$this->code      = $code;
 		$this->functions = $functions;
+
 		$this->parse();
 	}
 
 	private function parse() {
+
+		if ( empty( $this->code ) ) {
+			return;
+		}
+
 		$parser = ( new ParserFactory )->create( ParserFactory::PREFER_PHP7 );
 		try {
 			$ast = $parser->parse( $this->code );
-		} catch (Error $error) {
-			echo "Parse error: {$error->getMessage()}\n";
+		} catch ( Error $error ) {
 			return;
 		}
 
@@ -48,8 +53,8 @@ class Parser {
 
 	public function get_calls() {
 		$nodeFinder = new NodeFinder;
-		$calls = array();
-		$funcs = $nodeFinder->find(
+		$calls      = array();
+		$funcs      = $nodeFinder->find(
 			$this->ast,
 			function( Node $node ) use ( &$calls ) {
 
@@ -63,7 +68,25 @@ class Parser {
 			}
 		);
 		foreach ( $funcs as $key => $func ) {
-			$calls[] = $func->name->parts[0];
+
+			$args = array();
+
+			foreach ( $func->args as $key => $v ) {
+				if ( ! empty( $v->value ) ) {
+					$raw = $v->value->getAttribute( 'rawValue' );
+
+					$raw = trim( $raw, '\'"' );
+					$raw = ltrim( $raw, '\'"' );
+
+					$args[] = $raw;
+				}
+			}
+
+			$calls[] = array(
+				'name' => $func->name->parts[0],
+				'args' => $args,
+			);
+
 		}
 
 		$this->calls = $calls;
@@ -72,7 +95,7 @@ class Parser {
 
 	public function get_array_accesses() {
 		$nodeFinder = new NodeFinder;
-		
+
 		$dims = $nodeFinder->find( $this->ast, function( Node $node ) {
 			return $node instanceof \PhpParser\Node\Expr\ArrayDimFetch &&
 				$node->dim instanceof \PhpParser\Node\Scalar\String_;
@@ -93,14 +116,13 @@ class Parser {
 				$value['variable'] = $dim->var->name;
 			}
 			$value['key'] = $dim->dim->value;
-			
+
 			$keys[] = $value;
 		}
 
 		$this->array_accesses = array_unique( $keys, SORT_REGULAR );
 		return $this->array_accesses;
 
-		return ;
 	}
 
 	public function get_variables() {
@@ -120,9 +142,9 @@ class Parser {
 	}
 
 	public function get_code_attention() {
-		
+
 		$attention = 0;
-		
+
 		$array_accesses = $this->get_array_accesses();
 
 		$variables = array_column( $array_accesses, 'variable' );
@@ -130,9 +152,10 @@ class Parser {
 		$variables_count = array_count_values( $variables );
 
 		$interesting_variables = array(
-			'_POST'   => 2.5,
-			'_GET'    => 2,
-			'_SERVER' => 1,
+			'_REQUEST' => 2.5,
+			'_POST'    => 2.5,
+			'_GET'     => 2,
+			'_SERVER'  => 1,
 		);
 
 		foreach ( $interesting_variables as $key => $value ) {
@@ -150,12 +173,55 @@ class Parser {
 			$attention += 5;
 		}
 
+		$parser = ( new ParserFactory )->create( ParserFactory::PREFER_PHP7 );
+		$ast    = $parser->parse( $this->code );
+
+		$traverser = new NodeTraverser();
+		$visitor   = new CommonIssues();
+		$traverser->addVisitor( $visitor );
+		$ast = $traverser->traverse( $ast );
+
+		$traverser->addVisitor( $visitor );
+		$ast = $traverser->traverse( $ast );
+
+		$common_issues = $visitor->getValue();
+
 		$calls = $this->get_calls();
 
 		foreach ( $this->functions as $key => $value ) {
 			foreach ( $value['functions'] as $k => $function ) {
-				if ( in_array( $function, $calls, true ) ) {
+
+				$called = array_search( $function, array_column( $calls, 'name' ), true );
+				if ( false !== $called ) {
+
+					if ( ! empty( $value['common_issues'] ) && ! empty( $common_issues ) ) {
+						$attention += $common_issues * 5;
+					}
+
+					if ( 'nonces' === $key ) {
+						$nonce = '';
+						switch ( $function ) {
+							case 'wp_verify_nonce':
+								$nonce = $calls[ $called ]['args'][1];
+								break;
+						}
+
+						if ( ! empty( $nonce ) ) {
+							global $wpdb;
+							$added = $wpdb->get_row(
+								$wpdb->prepare(
+									'SELECT id FROM cebola_nonces WHERE action = %s',
+									$nonce,
+								)
+							);
+							if ( ! empty( $added ) ) {
+								continue;
+							}
+						}
+					}
+
 					$attention += $value['value'];
+
 					if ( ! empty( $value['unique'] ) ) {
 						break;
 					}

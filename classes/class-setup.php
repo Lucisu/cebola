@@ -147,7 +147,7 @@ class Setup {
 	private function send_requests() {
 		Logger::info( 'Sending initial requests...' );
 
-		$requests = array( 'http://localhost:8000', 'http://localhost:8000/index.php?rest_route=/' );
+		$requests = array( 'http://localhost:8000', 'http://localhost:8000/wp-admin/admin-ajax.php', 'http://localhost:8000/index.php?rest_route=/' );
 		foreach ( $requests as $key => $value ) {
 			// phpcs:disable
 			$url = $value;
@@ -161,7 +161,7 @@ class Setup {
 			\curl_close( $ch );
 			// phpcs:enable
 
-			if ( $httpcode >= 400 ) {
+			if ( ! str_contains( $url, 'wp-admin/admin-ajax.php' ) && $httpcode >= 400 ) {
 				Logger::error( sprintf( 'Something went wrong when accessing %s', $value ) );
 			}
 		}
