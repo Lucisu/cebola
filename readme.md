@@ -39,7 +39,7 @@ sudo apt-get update
 sudo apt-get upgrade -y
 ```
 
-####   
+####    
 
 ### Install PHP
 
@@ -48,6 +48,7 @@ sudo apt-get upgrade -y
 * Using the installation (.exe) files -> https://www.php.net/downloads.php
 
 * Chocolatey Install
+
 ```
 choco install php
 ```
@@ -55,6 +56,7 @@ choco install php
 [Mac]
 
 * Using homebrew run
+
 ```
 brew install php
 ```
@@ -62,6 +64,7 @@ brew install php
 [Linux]
 
 * Run the apt-get command
+
 ```
 sudo apt-get install php
 ```
@@ -73,6 +76,7 @@ sudo apt-get install php
 * Using the installation (.exe) files -> https://getcomposer.org/download/
 
 * Chocolatey Install
+
 ```
 choco install composer
 ```
@@ -82,6 +86,7 @@ When you are done with installations you should open your Docker client, and you
 [Mac]
 
 * Using homebrew run
+
 ```
 brew install composer
 ```
@@ -98,8 +103,12 @@ Install other packages
 
 [Linux]
 
-sudo apt install php8.1-mysql
+Make sure that you also install these:
+
+```
+apt-get install php8.1-mysql
 apt-get install php8.1-curl
+```
 
 ### Install Docker
 
