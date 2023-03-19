@@ -5,11 +5,9 @@ namespace Cebola\Classes;
 class Environment {
 
 	const CONTAINER_NAME = 'container-wp-1';
-	private $container   = array();
 	private $variables   = array();
 
 	public function set_container() {
-
 		$running = shell_exec( 'docker ps --filter "name=' . $this->sanitize_var( self::CONTAINER_NAME ) . '" --filter "status=running" --quiet' );
 
 		if ( empty( $running ) ) {
@@ -46,16 +44,13 @@ class Environment {
 			$this->variables[ $variable[0] ] = $variable[1];
 		}
 
-		$this->container = $info;
-
 		$this->set_constants();
 	}
 
 	public function stop_container() {
 		Logger::info( 'Stopping docker container...' );
 		echo "\n";
-		
-		// making sure the code below runs on Windows
+    // making sure the code below runs on Windows
 		if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
 			shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
 			
@@ -66,8 +61,7 @@ class Environment {
 
 	public function run_container() {
 		Logger::info( 'Starting docker container...' );
-		
-		// making sure the code below runs on Windows
+    // making sure the code below runs on Windows
 		if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
 			shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
 			
@@ -80,7 +74,7 @@ class Environment {
 
 	public function install_dependencies() {
 		Logger::info( 'Installing Dependencies...' );
-		shell_exec( 'docker exec -it --user root ' . $this->sanitize_var( self::CONTAINER_NAME ) . ' sh -cx "apt-get update && pecl install xdebug && docker-php-ext-enable xdebug && pecl install uopz && echo \'extension=uopz.so\' >> /usr/local/etc/php/conf.d/conf.ini && /etc/init.d/apache2 reload"' );
+		shell_exec( 'docker exec -it --user root ' . $this->sanitize_var( self::CONTAINER_NAME ) . ' sh -cx "apt-get update && pecl install xdebug && docker-php-ext-enable xdebug && pecl install uopz && /etc/init.d/apache2 reload"' );
 	}
 
 	public function set_wp_debug( bool $value ) {
@@ -92,7 +86,7 @@ class Environment {
 
 	public function set_plugin( string $plugin ) {
 		Logger::info( sprintf( 'Activating plugin %s...', $plugin ) );
-		shell_exec( 'docker exec -it container-wpcli-1 sh -cx "wp plugin install ' . $this->sanitize_var( $plugin ) . ' --activate"' );
+		$output = shell_exec( 'docker exec -it container-wpcli-1 sh -cx "wp plugin install ' . $plugin . ' --activate"' );
 	}
 
 	private function set_constants() {

@@ -2,13 +2,13 @@ version: '3'
 
 services:
   wp:
-    user: "1000:1000"
     image: wordpress:latest
     ports:
       - ${IP}:8000:80
     volumes:
       - ./config/php.conf.ini:/usr/local/etc/php/conf.d/conf.ini
-      - ./wp:/var/www/html
+      - ./wp-data:/var/www/html
+      - ../addons:/var/www/addons
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_NAME: "${DB_NAME}"
@@ -20,12 +20,11 @@ services:
       - db
 
   wpcli:
-    user: "1000:1000"
     image: wordpress:cli
     tty: true
     volumes:
       - ./config/php.conf.ini:/usr/local/etc/php/conf.d/conf.ini
-      - ./wp:/var/www/html
+      - ./wp-data:/var/www/html
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_NAME: "${DB_NAME}"
@@ -35,13 +34,12 @@ services:
       /bin/sh -c '
       sleep 10;
       wp core install --path="/var/www/html" --url="http://localhost:8000" --title="CEBOLA" --admin_user=admin --admin_password=secret --admin_email=user@example.com;
+      ln -s /var/www/addons/mu-plugins /var/www/html/wp-content;
       tail -f /dev/null
       '
     depends_on:
-      db:
-        condition: service_healthy
-      wp:
-        condition: service_started
+      - db
+      - wp
 
   pma:
     image: phpmyadmin/phpmyadmin
@@ -60,18 +58,17 @@ services:
     ports:
       - ${IP}:3068:3306
     command: [
-        '--default_authentication_plugin=mysql_native_password',
-        '--character-set-server=utf8mb4',
-        '--collation-server=utf8mb4_unicode_ci'
+      '--default_authentication_plugin=mysql_native_password',
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci'
     ]
     volumes:
-      - ./wp-data:/docker-entrypoint-initdb.d
-      - db_data:/var/lib/mysql
+      - ./db-data:/var/lib/mysql
     environment:
       MYSQL_DATABASE: "${DB_NAME}"
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 5s
       retries: 20
 
