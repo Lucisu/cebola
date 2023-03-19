@@ -203,7 +203,11 @@ class Functions {
 
 		if ( empty( $url ) ) {
 			global $wp;
-			$url = home_url( $wp->request );
+			if ( empty( $wp ) ) {
+				$url = 'https://' . $_SERVER['HOST'] . $_SERVER['REQUEST_URI'];
+			} else {
+				$url = home_url( $wp->request );
+			}
 		}
 
 		global $wpdb;
