@@ -27,6 +27,7 @@ class Database {
 			$this->conn     = \mysqli_connect( '127.0.0.1', CEBOLA_DB_USER, CEBOLA_DB_PASSWORD, CEBOLA_DB_NAME, 3068 );
 			$this->is_fresh = $this->is_fresh();
 		} catch ( \Exception $e ) {
+			Logger::error( 'Error connecting to the database: ' . $e->getMessage() );
 			return $e;
 		}
 	}
@@ -57,6 +58,8 @@ class Database {
 		$this->query( 'DROP TABLE IF EXISTS cebola_functions;' );
 		$this->query( 'DROP TABLE IF EXISTS cebola_reports;' );
 		$this->query( 'DROP TABLE IF EXISTS cebola_parameters;' );
+		$this->query( 'DROP TABLE IF EXISTS cebola_nonces;' );
+		$this->query( 'DROP TABLE IF EXISTS cebola_urls;' );
 
 		$this->query(
 			'CREATE TABLE cebola_meta (
@@ -94,6 +97,21 @@ class Database {
 			'CREATE TABLE cebola_parameters (
 				`id` INT NOT NULL AUTO_INCREMENT,
 				`name` VARCHAR(100) UNIQUE,
+				PRIMARY KEY (`id`)
+			);'
+		);
+		$this->query(
+			'CREATE TABLE cebola_nonces (
+				`id` INT NOT NULL AUTO_INCREMENT,
+				`action` VARCHAR(200) NOT NULL,
+				`value` VARCHAR(200),
+				PRIMARY KEY (`id`)
+			);'
+		);
+		$this->query(
+			'CREATE TABLE cebola_urls (
+				`id` INT NOT NULL AUTO_INCREMENT,
+				`url` VARCHAR(500) UNIQUE,
 				PRIMARY KEY (`id`)
 			);'
 		);
