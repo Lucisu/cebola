@@ -56,7 +56,7 @@ class Setup {
 			}
 		}
 
-		$writable = array( CEBOLA_CONTAINER_DIR, CEBOLA_WP_DIR  );
+		$writable = array( CEBOLA_CONTAINER_DIR, CEBOLA_WP_DIR );
 		foreach ( $writable as $key => $value ) {
 			if ( file_exists( $value ) && ! is_writable( $value ) ) {
 				Logger::error( sprintf( '%s is not writable', $value ) );
@@ -123,16 +123,17 @@ class Setup {
 	}
 
 	private function install() {
+
 		@rmdir( CEBOLA_WP_DIR );
 		$this->environment->set_container();
-		$this->database->connect();
 		$this->environment->install_dependencies();
 		$this->environment->set_wp_debug( $this->args['wp-debug'] );
 		$this->environment->set_plugin( $this->args['plugin'] );
 		$this->database->install( $this->args['plugin'] );
+
 		$this->send_requests();
 	}
-    
+
 
 	private function send_requests() {
 		Logger::info( 'Sending initial requests...' );

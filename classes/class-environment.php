@@ -78,7 +78,9 @@ class Environment {
 	}
 
 	private function set_constants() {
-		$vars = array( 'WORDPRESS_DB_NAME', 'WORDPRESS_DB_USER', 'WORDPRESS_DB_PASSWORD' );
+
+		// Let's get the WordPress database variables, we're going to use the same username and password for our database.
+		$vars = array( 'WORDPRESS_DB_USER', 'WORDPRESS_DB_PASSWORD' );
 		foreach ( $vars as $key => $value ) {
 			$var = $this->get_var( $value );
 
@@ -88,6 +90,9 @@ class Environment {
 
 			define( str_replace( 'WORDPRESS_', 'CEBOLA_', $value ), $var );
 		}
+
+		// New report database
+		define( 'CEBOLA_DB_NAME', 'cebola_reports' );
 	}
 
 	/**
