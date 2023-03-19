@@ -50,12 +50,24 @@ class Environment {
 	public function stop_container() {
 		Logger::info( 'Stopping docker container...' );
 		echo "\n";
-		shell_exec( 'sh ' . CEBOLA_CONTAINER_DIR . '/stop.sh' );
+    // making sure the code below runs on Windows
+		if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
+			shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
+			
+		} else {
+			shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
+		}
 	}
 
 	public function run_container() {
 		Logger::info( 'Starting docker container...' );
-		shell_exec( 'sh ' . CEBOLA_CONTAINER_DIR . '/start.sh' );
+    // making sure the code below runs on Windows
+		if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
+			shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
+			
+		} else {
+			shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
+		}
 		sleep( 5 );
 		$this->set_container();
 	}
