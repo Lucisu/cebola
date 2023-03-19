@@ -1,79 +1,97 @@
-version: '3'
+version: '3.4'
 
-services:
-  wp:
-    user: "1000:1000"
-    image: wordpress:latest
-    ports:
-      - ${IP}:8000:80
-    volumes:
-      - ./config/php.conf.ini:/usr/local/etc/php/conf.d/conf.ini
-      - ./wp:/var/www/html
-    environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_NAME: "${DB_NAME}"
-      WORDPRESS_DB_USER: root
-      WORDPRESS_DB_PASSWORD: "${DB_ROOT_PASSWORD}"
-    depends_on:
-      - db
-    links:
-      - db
+x-wp-core-volume:
+  &wp_core
+  type: bind
+  source: ./wp
+  target: /var/www/html
 
-  wpcli:
-    user: "1000:1000"
-    image: wordpress:cli
-    tty: true
-    volumes:
-      - ./config/php.conf.ini:/usr/local/etc/php/conf.d/conf.ini
-      - ./wp:/var/www/html
-    environment:
-      WORDPRESS_DB_HOST: db
-      WORDPRESS_DB_NAME: "${DB_NAME}"
-      WORDPRESS_DB_USER: root
-      WORDPRESS_DB_PASSWORD: "${DB_ROOT_PASSWORD}"
-    command: >
-      /bin/sh -c '
-      sleep 10;
-      wp core install --path="/var/www/html" --url="http://localhost:8000" --title="CEBOLA" --admin_user=admin --admin_password=secret --admin_email=user@example.com;
-      tail -f /dev/null
-      '
-    depends_on:
-      db:
-        condition: service_healthy
-      wp:
-        condition: service_started
+x-php-ini:
+  &php_ini
+  type: bind
+  source: ./config/php.conf.ini
+  target: /usr/local/etc/php/conf.d/conf.ini
 
-  pma:
-    image: phpmyadmin/phpmyadmin
-    environment:
-      # https://docs.phpmyadmin.net/en/latest/setup.html#docker-environment-variables
-      PMA_HOST: db
-      PMA_PORT: 3306
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-    ports:
-      - ${IP}:8080:80
-    links:
-      - db:db
+x-startup-commands:
+  &commands
+  type: bind
+  source: ./commands
+  target: /usr/local/bin/commands
 
-  db:
-    image: mysql:latest # https://hub.docker.com/_/mysql/ - or mariadb https://hub.docker.com/_/mariadb
-    ports:
-      - ${IP}:3068:3306
-    command: [
-        '--default_authentication_plugin=mysql_native_password',
-        '--character-set-server=utf8mb4',
-        '--collation-server=utf8mb4_unicode_ci'
-    ]
-    volumes:
-      - ./wp-data:/docker-entrypoint-initdb.d
-      - db_data:/var/lib/mysql
-    environment:
-      MYSQL_DATABASE: "${DB_NAME}"
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 5s
-      retries: 20
+networks:
+  default:
+    driver: bridge
 
 volumes:
   db_data:
+
+services:
+  mariadb:
+    image: mariadb
+    restart: always
+    ports:
+      - ${IP}:12306:3306
+    volumes:
+      - ./db_data:/var/lib/mysql
+    environment:
+      MARIADB_DATABASE: "${DB_NAME}"
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+    healthcheck:
+      test: "/usr/bin/mysqladmin --password=${DB_ROOT_PASSWORD}"
+      timeout: 5s
+      retries: 20
+    networks:
+      - default
+  wpcore:
+    image: wordpress:php8.0-fpm
+    ports:
+      - ${IP}:12080:80
+    working_dir: /var/www/html
+    volumes:
+      - *php_ini
+      - *wp_core
+      - *commands
+    command: [ "/bin/sh" ,"-c", "/usr/local/bin/commands/init-wp.sh" ]
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_NAME: "${DB_NAME}"
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: "${DB_ROOT_PASSWORD}"
+      WORDPRESS_DB_PORT: "${DB_PORT}"
+      WORDPRESS_DEBUG: 1
+    depends_on:
+      - mariadb
+    networks:
+      - default
+
+  wpcli:
+    image: wordpress:cli
+    tty: true
+    volumes:
+      - *php_ini
+      - *wp_core
+      - *commands
+    environment:
+      WORDPRESS_DB_HOST: mariadb
+      WORDPRESS_DB_NAME: "${DB_NAME}"
+      WORDPRESS_DB_USER: root
+      WORDPRESS_DB_PASSWORD: "${DB_ROOT_PASSWORD}"
+      WORDPRESS_DB_PORT: "${DB_PORT}"
+      WORDPRESS_DEBUG: 1
+    depends_on:
+      - mariadb
+      - wpcore
+    networks:
+      - default
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+    ports:
+      - ${IP}:12088:80
+    networks:
+      - default

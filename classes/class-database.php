@@ -24,7 +24,7 @@ class Database {
 
 	private function try_connection() {
 		try {
-			$this->conn     = \mysqli_connect( '127.0.0.1', CEBOLA_DB_USER, CEBOLA_DB_PASSWORD, CEBOLA_DB_NAME, 3068 );
+			$this->conn     = \mysqli_connect( '127.0.0.1', CEBOLA_DB_USER, CEBOLA_DB_PASSWORD, CEBOLA_DB_NAME, 12306 );
 			$this->is_fresh = $this->is_fresh();
 		} catch ( \Exception $e ) {
 			return $e;
