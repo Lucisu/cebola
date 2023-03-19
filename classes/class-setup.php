@@ -63,7 +63,7 @@ class Setup {
 			}
 		}
 		
-		$commands = array( 'composer', 'docker' );
+		$commands = array( 'composer', 'docker', 'git', 'mysql', 'python3' );
 		foreach ( $commands as $key => $value ) {
 			
 			if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
