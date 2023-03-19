@@ -27,6 +27,7 @@ class Database {
 			$this->conn     = \mysqli_connect( '127.0.0.1', CEBOLA_DB_USER, CEBOLA_DB_PASSWORD, CEBOLA_DB_NAME, 3068 );
 			$this->is_fresh = $this->is_fresh();
 		} catch ( \Exception $e ) {
+			Logger::error( 'Error connecting to the database: ' . $e->getMessage() );
 			return $e;
 		}
 	}
