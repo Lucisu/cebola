@@ -15,7 +15,11 @@ function cebolaInstallMissingLibraries() {
 }
 
 function cebolaInstallUopz() {
-  pecl -q install uopz
+  apt-get update
+  pecl install xdebug
+  docker-php-ext-enable xdebug
+  pecl install uopz
+  /etc/init.d/apache2 reload
 }
 
 apt-get -qq update && apt-get -qq -y upgrade
