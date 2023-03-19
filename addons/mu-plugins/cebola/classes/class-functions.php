@@ -105,7 +105,7 @@ class Functions {
 		uopz_set_hook(
 			'add_action',
 			function( $hook_name, $callback, $priority = 10, $accepted_args = 1 ) use ( $class ) {
-				$is_plugin = $class->can_add( $hook_name, $callback );
+				$is_plugin = is_cebola_plugin( $hook_name, $callback );
 				if ( $is_plugin ) {
 					$class->register[] = array(
 						'data'          => $is_plugin,
@@ -121,7 +121,7 @@ class Functions {
 		uopz_set_hook(
 			'add_filter',
 			function( $hook_name, $callback, $priority = 10, $accepted_args = 1 ) use ( $class ) {
-				$is_plugin = $class->can_add( $hook_name, $callback );
+				$is_plugin = is_cebola_plugin( $hook_name, $callback );
 				if ( $is_plugin ) {
 					$class->register[] = array(
 						'data'          => $is_plugin,
@@ -138,7 +138,7 @@ class Functions {
 			'register_rest_route',
 			function( $namespace, $route, $parameters ) use ( $class ) {
 				if ( ! empty( $parameters[0] ) && ! empty( $parameters[0]['callback'] ) ) {
-					$is_plugin = $class->can_add();
+					$is_plugin = is_cebola_plugin();
 					if ( $is_plugin ) {
 						$class->register[] = array(
 							'data'          => $is_plugin,
@@ -259,30 +259,6 @@ class Functions {
 		
 		// $message = sprintf( "/*\nHook added: %s | %s:%d\n%s\n*/\n%s\n", $hook_name, $data['file'], $data['line'], json_encode( $data, JSON_PRETTY_PRINT ), $function );
 		// file_put_contents( '/var/www/html/wp-content/mu-plugins/cebola/logs/CEBOLA.txt', $message, FILE_APPEND );
-	}
-
-	public function can_add( $hook_name = '', $callback = '' ) {
-
-		$ignore_hooks     = array();
-		$ignore_callbacks = array( '_future_post_hook', '_wp_ajax_add_hierarchical_term' );
-
-		if ( in_array( $hook_name, $ignore_hooks, true ) || in_array( $callback, $ignore_callbacks, true ) ) {
-			return;
-		}
-
-		$debug = debug_backtrace();
-	
-		$checks = 10;
-		foreach ( $debug as $key => $value ) {
-			if ( 0 === $checks ) {
-				break;
-			}
-			if ( ! empty( $value['file'] ) && str_starts_with( $value['file'], CEBOLA_TESTING_PLUGIN ) ) {
-				return $value;
-			}
-			$checks--;
-		}
-		return false;
 	}
 
 	private function get_function_body( $function ) {

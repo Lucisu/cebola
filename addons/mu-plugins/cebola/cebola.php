@@ -7,6 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/functions.php';
 require __DIR__ . '/classes/class-parser.php';
 require __DIR__ . '/classes/class-injections.php';
 require __DIR__ . '/classes/class-functions.php';
