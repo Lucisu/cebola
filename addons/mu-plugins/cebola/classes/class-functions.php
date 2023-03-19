@@ -96,7 +96,11 @@ class Functions {
 
 	public function register_functions() {
 		foreach ( $this->register as $key => $function ) {
-			$this->register_function( $function['data'], $function['type'], $function['hook_name'], $function['callback'], $function['priority'], $function['accepted_args'] );
+			if ( 'nonce' === $function['type'] ) {
+				$this->register_nonce( $function['action'] );
+			} else {
+				$this->register_function( $function['data'], $function['type'], $function['hook_name'], $function['callback'], $function['priority'], $function['accepted_args'] );
+			}
 		}
 	}
 
@@ -151,6 +155,41 @@ class Functions {
 					}
 				}
 			}
+		);
+		uopz_set_hook(
+			'wp_create_nonce',
+			function( $action ) use ( $class ) {
+				$is_plugin = is_cebola_plugin();
+				if ( $is_plugin ) {
+					$class->register[] = array(
+						'data'   => $is_plugin,
+						'type'   => 'nonce',
+						'action' => $action,
+					);
+				}
+			}
+		);
+	}
+
+	public function register_nonce( $action ) {
+		global $wpdb;
+
+		$added = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id FROM cebola_nonces WHERE action = %s',
+				$action,
+			)
+		);
+
+		if ( ! empty( $added ) ) {
+			return;
+		}
+
+		$wpdb->insert(
+			'cebola_nonces',
+			array(
+				'action' => $action,
+			)
 		);
 	}
 

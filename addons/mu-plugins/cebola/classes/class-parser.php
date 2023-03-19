@@ -21,6 +21,7 @@ class Parser {
 		$code            = "<?php\nclass CEBOLA {\n" . $code . '}';
 		$this->code      = $code;
 		$this->functions = $functions;
+
 		$this->parse();
 	}
 
@@ -48,8 +49,8 @@ class Parser {
 
 	public function get_calls() {
 		$nodeFinder = new NodeFinder;
-		$calls = array();
-		$funcs = $nodeFinder->find(
+		$calls      = array();
+		$funcs      = $nodeFinder->find(
 			$this->ast,
 			function( Node $node ) use ( &$calls ) {
 
@@ -63,7 +64,25 @@ class Parser {
 			}
 		);
 		foreach ( $funcs as $key => $func ) {
-			$calls[] = $func->name->parts[0];
+
+			$args = array();
+
+			foreach ( $func->args as $key => $v ) {
+				if ( ! empty( $v->value ) ) {
+					$raw = $v->value->getAttribute( 'rawValue' );
+
+					$raw = trim( $raw, '\'"' );
+					$raw = ltrim( $raw, '\'"' );
+
+					$args[] = $raw;
+				}
+			}
+
+			$calls[] = array(
+				'name' => $func->name->parts[0],
+				'args' => $args,
+			);
+
 		}
 
 		$this->calls = $calls;
@@ -72,7 +91,7 @@ class Parser {
 
 	public function get_array_accesses() {
 		$nodeFinder = new NodeFinder;
-		
+
 		$dims = $nodeFinder->find( $this->ast, function( Node $node ) {
 			return $node instanceof \PhpParser\Node\Expr\ArrayDimFetch &&
 				$node->dim instanceof \PhpParser\Node\Scalar\String_;
@@ -93,14 +112,13 @@ class Parser {
 				$value['variable'] = $dim->var->name;
 			}
 			$value['key'] = $dim->dim->value;
-			
+
 			$keys[] = $value;
 		}
 
 		$this->array_accesses = array_unique( $keys, SORT_REGULAR );
 		return $this->array_accesses;
 
-		return ;
 	}
 
 	public function get_variables() {
@@ -155,7 +173,32 @@ class Parser {
 
 		foreach ( $this->functions as $key => $value ) {
 			foreach ( $value['functions'] as $k => $function ) {
-				if ( in_array( $function, $calls, true ) ) {
+
+				$called = array_search( $function, array_column( $calls, 'name' ), true );
+				if ( false !== $called ) {
+
+					if ( 'nonces' === $key ) {
+						$nonce = '';
+						switch ( $function ) {
+							case 'wp_verify_nonce':
+								$nonce = $calls[ $called ]['args'][1];
+								break;
+						}
+
+						if ( ! empty( $nonce ) ) {
+							global $wpdb;
+							$added = $wpdb->get_row(
+								$wpdb->prepare(
+									'SELECT id FROM cebola_nonces WHERE action = %s',
+									$nonce,
+								)
+							);
+							if ( ! empty( $added ) ) {
+								continue;
+							}
+						}
+					}
+
 					$attention += $value['value'];
 					if ( ! empty( $value['unique'] ) ) {
 						break;

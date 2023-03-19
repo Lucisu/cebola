@@ -57,6 +57,7 @@ class Database {
 		$this->query( 'DROP TABLE IF EXISTS cebola_functions;' );
 		$this->query( 'DROP TABLE IF EXISTS cebola_reports;' );
 		$this->query( 'DROP TABLE IF EXISTS cebola_parameters;' );
+		$this->query( 'DROP TABLE IF EXISTS cebola_nonces;' );
 
 		$this->query(
 			'CREATE TABLE cebola_meta (
@@ -94,6 +95,14 @@ class Database {
 			'CREATE TABLE cebola_parameters (
 				`id` INT NOT NULL AUTO_INCREMENT,
 				`name` VARCHAR(100) UNIQUE,
+				PRIMARY KEY (`id`)
+			);'
+		);
+		$this->query(
+			'CREATE TABLE cebola_nonces (
+				`id` INT NOT NULL AUTO_INCREMENT,
+				`action` VARCHAR(200) NOT NULL,
+				`value` VARCHAR(200),
 				PRIMARY KEY (`id`)
 			);'
 		);
