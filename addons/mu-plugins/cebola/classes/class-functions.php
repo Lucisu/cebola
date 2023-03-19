@@ -113,6 +113,7 @@ class Functions {
 			function( $hook_name, $callback, $priority = 10, $accepted_args = 1 ) use ( $class ) {
 				$is_plugin = is_cebola_plugin( $hook_name, $callback );
 				if ( $is_plugin ) {
+					$class->register_url();
 					$class->register[] = array(
 						'data'          => $is_plugin,
 						'type'          => 'action',
@@ -129,6 +130,7 @@ class Functions {
 			function( $hook_name, $callback, $priority = 10, $accepted_args = 1 ) use ( $class ) {
 				$is_plugin = is_cebola_plugin( $hook_name, $callback );
 				if ( $is_plugin ) {
+					$class->register_url();
 					$class->register[] = array(
 						'data'          => $is_plugin,
 						'type'          => 'filter',
@@ -146,6 +148,7 @@ class Functions {
 				if ( ! empty( $parameters[0] ) && ! empty( $parameters[0]['callback'] ) ) {
 					$is_plugin = is_cebola_plugin();
 					if ( $is_plugin ) {
+						$class->register_url();
 						$class->register[] = array(
 							'data'          => $is_plugin,
 							'type'          => 'route',
@@ -163,6 +166,7 @@ class Functions {
 			function( $action ) use ( $class ) {
 				$is_plugin = is_cebola_plugin();
 				if ( $is_plugin ) {
+					$class->register_url();
 					$class->register[] = array(
 						'data'   => $is_plugin,
 						'type'   => 'nonce',
@@ -191,6 +195,34 @@ class Functions {
 			'cebola_nonces',
 			array(
 				'action' => $action,
+			)
+		);
+	}
+
+	public function register_url( $url = '' ) {
+
+		if ( empty( $url ) ) {
+			global $wp;
+			$url = home_url( $wp->request );
+		}
+
+		global $wpdb;
+
+		$added = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id FROM cebola_urls WHERE url = %s',
+				$url,
+			)
+		);
+
+		if ( ! empty( $added ) ) {
+			return;
+		}
+
+		$wpdb->insert(
+			'cebola_urls',
+			array(
+				'url' => $url,
 			)
 		);
 	}
