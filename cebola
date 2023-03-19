@@ -1,7 +1,10 @@
+#!/usr/bin/env php
 <?php
 namespace Cebola;
 
 define( 'CEBOLA_DIR', __DIR__ );
+define( 'CEBOLA_CONTAINER_DIR', CEBOLA_DIR . '/container' );
+define( 'CEBOLA_WP_DIR', CEBOLA_CONTAINER_DIR . '/wp-data' );
 
 function init_cebola() {
 	require CEBOLA_DIR . '/classes/class-logger.php';

@@ -1,1 +1,8 @@
-includes/cebola/vendor
+addons/mu-plugins/cebola/vendor
+container/wp
+container/wp-data
+container/db-data
+.vscode
+.env
+.DS_Store
+.idea

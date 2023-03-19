@@ -3,8 +3,14 @@ version: '3.4'
 x-wp-core-volume:
   &wp_core
   type: bind
-  source: ./wp
+  source: ./wp-data
   target: /var/www/html
+
+x-wp-core-addons:
+  &wp_addons
+  type: bind
+  source: ./addons
+  target: /var/www/addons
 
 x-php-ini:
   &php_ini
@@ -23,7 +29,7 @@ networks:
     driver: bridge
 
 volumes:
-  db_data:
+  db-data:
 
 services:
   mariadb:
@@ -32,7 +38,7 @@ services:
     ports:
       - ${IP}:12306:3306
     volumes:
-      - ./db_data:/var/lib/mysql
+      - ./db-data:/var/lib/mysql
     environment:
       MARIADB_DATABASE: "${DB_NAME}"
       MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
@@ -50,6 +56,7 @@ services:
     volumes:
       - *php_ini
       - *wp_core
+      - *wp_addons
       - *commands
     command: [ "/bin/sh" ,"-c", "/usr/local/bin/commands/init-wp.sh" ]
     environment:
