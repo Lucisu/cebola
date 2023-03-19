@@ -137,7 +137,7 @@ class Setup {
 	private function send_requests() {
 		Logger::info( 'Sending initial requests...' );
 
-		$requests = array( 'http://localhost:8000', 'http://localhost:8000/index.php?rest_route=/' );
+		$requests = array( 'http://localhost:8000', 'http://localhost:8000/wp-admin/admin-ajax.php', 'http://localhost:8000/index.php?rest_route=/' );
 		foreach ( $requests as $key => $value ) {
 			// phpcs:disable
 			$url = $value;
