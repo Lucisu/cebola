@@ -120,9 +120,9 @@ class Parser {
 	}
 
 	public function get_code_attention() {
-		
+
 		$attention = 0;
-		
+
 		$array_accesses = $this->get_array_accesses();
 
 		$variables = array_column( $array_accesses, 'variable' );
@@ -130,9 +130,10 @@ class Parser {
 		$variables_count = array_count_values( $variables );
 
 		$interesting_variables = array(
-			'_POST'   => 2.5,
-			'_GET'    => 2,
-			'_SERVER' => 1,
+			'_REQUEST' => 2.5,
+			'_POST'    => 2.5,
+			'_GET'     => 2,
+			'_SERVER'  => 1,
 		);
 
 		foreach ( $interesting_variables as $key => $value ) {
