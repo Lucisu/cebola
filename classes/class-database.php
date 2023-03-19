@@ -50,7 +50,14 @@ class Database {
 		$conn->close();
 	}
 
-	public function query( $sql ) {
+	public function do_query( $sql ) {
+		$this->connect();
+		$result = $this->conn->query( $sql );
+		$this->disconnect();
+		return $result;
+	}
+
+	private function query( $sql ) {
 		return $this->conn->query( $sql );
 	}
 
@@ -59,6 +66,8 @@ class Database {
 	}
 
 	private function create_tables() {
+
+		$this->connect();
 
 		$this->query( 'DROP TABLE IF EXISTS cebola_meta;' );
 		$this->query( 'DROP TABLE IF EXISTS cebola_functions;' );
@@ -122,5 +131,7 @@ class Database {
 				PRIMARY KEY (`id`)
 			);'
 		);
+
+		$this->disconnect();
 	}
 }

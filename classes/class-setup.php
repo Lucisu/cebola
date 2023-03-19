@@ -18,12 +18,6 @@ class Setup {
 	 */
 	private $environment;
 
-	/**
-	 * Provides the access to the WordPress database.
-	 *
-	 * @var \Cebola\Classes\Database
-	 */
-	private $database;
 
 	/**
 	 * Parses the provided arguments, sets initial variables and install the tool.
@@ -32,11 +26,18 @@ class Setup {
 		require CEBOLA_DIR . '/classes/class-database.php';
 		require CEBOLA_DIR . '/classes/class-environment.php';
 
+		/**
+		 * Provides the access to the WordPress database.
+		 *
+		 * @var \Cebola\Classes\Database
+		 */
+		global $cebola_database;
+
 		$this->parse_arguments();
 		$this->check_requirements();
 
 		$this->environment = new Environment();
-		$this->database    = new Database();
+		$cebola_database   = new Database();
 
 		$this->maybe_install();
 
@@ -62,22 +63,21 @@ class Setup {
 				Logger::error( sprintf( '%s is not writable', $value ) );
 			}
 		}
-		
+
 		$commands = array( 'composer', 'docker' );
 		foreach ( $commands as $key => $value ) {
-			
+
 			if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
 				if ( empty( shell_exec( 'where ' . $value ) ) ) {
 					Logger::error( sprintf( '%s is not available', $value ) );
 				}
-			}
-			else{
+			} else {
 				if ( empty( shell_exec( 'which ' . $value ) ) ) {
 					Logger::error( sprintf( '%s is not available', $value ) );
 				}
 			}
 		}
-		
+
 	}
 
 	/**
@@ -123,22 +123,26 @@ class Setup {
 	 * @return void
 	 */
 	private function maybe_install() {
-		if ( ! empty( $this->args['fresh'] ) || $this->database->is_fresh || ! file_exists( CEBOLA_WP_DIR . '/wp-config.php' ) ) {
+		global $cebola_database;
+
+		if ( ! empty( $this->args['fresh'] ) || $cebola_database->is_fresh || ! file_exists( CEBOLA_WP_DIR . '/wp-config.php' ) ) {
 			$this->install();
 		} else {
 			$this->environment->set_container();
-			$this->database->connect();
+			$cebola_database->connect();
 		}
 	}
 
 	private function install() {
+
+		global $cebola_database;
 
 		@rmdir( CEBOLA_WP_DIR );
 		$this->environment->set_container();
 		$this->environment->install_dependencies();
 		$this->environment->set_wp_debug( $this->args['wp-debug'] );
 		$this->environment->set_plugin( $this->args['plugin'] );
-		$this->database->install( $this->args['plugin'] );
+		$cebola_database->install( $this->args['plugin'] );
 
 		$this->send_requests();
 	}
@@ -165,7 +169,6 @@ class Setup {
 				Logger::error( sprintf( 'Something went wrong when accessing %s', $value ) );
 			}
 		}
-
 	}
 
 	/**
