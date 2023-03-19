@@ -29,6 +29,7 @@ Note: you may get the error that some packages are missing. In that case please 
 3. Install Composer
 > `>` choco install composer
 
+When you are done with installations you should open  your Docker client, and you can continue there.
 
 ```bash
 cd ./includes/cebola
