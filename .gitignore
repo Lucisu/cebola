@@ -1,7 +1,9 @@
 addons/mu-plugins/cebola/vendor
 container/wp
-container/wp-data
-container/db-data
+container/wp-data/*
+!container/wp-data/.gitkeep
+container/db-data/*
+!container/db-data/.gitkeep
 .vscode
 .env
 .DS_Store
