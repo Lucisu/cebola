@@ -94,6 +94,7 @@ class Functions {
 	public function __construct() {
 		$this->hook_functions();
 		add_action( 'shutdown', array( $this, 'register_functions' ) );
+		add_action( 'shutdown', array( $this, 'run_tools' ) );
 	}
 
 	public function register_functions() {
@@ -104,6 +105,31 @@ class Functions {
 				$this->register_function( $function['data'], $function['type'], $function['hook_name'], $function['callback'], $function['priority'], $function['accepted_args'] );
 			}
 		}
+	}
+
+	public function run_tools() {
+		global $wpdb;
+
+		$urls       = '';
+		$parameters = array();
+
+		$saved_parameters = $wpdb->get_col(
+			'SELECT name FROM cebola_parameters',
+		);
+
+		foreach ( $saved_parameters as $key => $value ) {
+			$parameters[ $value ] = 'a';
+		}
+
+		$saved_urls = $wpdb->get_col(
+			'SELECT url FROM cebola_urls',
+		);
+
+		foreach ( $saved_urls as $key => $value ) {
+			$urls .= add_query_arg( $parameters, $value ) . "\n";
+		}
+
+		file_put_contents( WP_CONTENT_DIR . '/urls.txt', $urls );
 	}
 
 	private function hook_functions() {

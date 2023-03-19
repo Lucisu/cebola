@@ -131,8 +131,8 @@ class Setup {
 		$this->environment->set_plugin( $this->args['plugin'] );
 		$this->database->install( $this->args['plugin'] );
 		$this->send_requests();
+		$this->run_tools();
 	}
-    
 
 	private function send_requests() {
 		Logger::info( 'Sending initial requests...' );
@@ -154,6 +154,27 @@ class Setup {
 			if ( ! str_contains( $url, 'wp-admin/admin-ajax.php' ) && $httpcode >= 400 ) {
 				Logger::error( sprintf( 'Something went wrong when accessing %s', $value ) );
 			}
+		}
+	}
+
+	private function run_tools() {
+		Logger::info( 'Installing external tools...' );
+
+		shell_exec( 'git clone https://github.com/s0md3v/XSStrike.git 2>/dev/null ' . CEBOLA_DIR . '/tools' );
+
+		Logger::info( 'Running external tools...' );
+
+		$urls_file = CEBOLA_DIR . '/container/wp-data/wp-content/urls.txt';
+
+		$urls = file_get_contents( $urls_file );
+		$urls = explode( "\n", $urls );
+		$urls = array_filter( $urls );
+		$urls = array_unique( $urls );
+
+		file_put_contents( CEBOLA_DIR . '/urls.txt', implode( "\n", $urls ) );
+
+		foreach ( $urls as $key => $value ) {
+			shell_exec( 'python3 ' . CEBOLA_DIR . '/tools/XSStrike/xsstrike.py --skip --file-log-level VULN -l 1 -t 5 --log-file ' . CEBOLA_DIR . '/xsstrike.log -u "' . $value . '"' );
 		}
 
 	}
