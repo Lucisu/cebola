@@ -4,6 +4,7 @@ namespace Cebola\Classes;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 
+// TODO: check if "! empty && nonce" is evrified.
 class CommonIssues extends NodeVisitorAbstract {
 	private $return_value = -1;
 	private $wp_funcs = array( 'update_option', 'update_user', 'wp_delete_user' );
@@ -18,12 +19,12 @@ class CommonIssues extends NodeVisitorAbstract {
 					// The condition is a boolean AND operator
 					$leftExpr = $node->cond->left;
 					$rightExpr = $node->cond->right;
-					// Check if the left expression contains $_GET and wp_verify_nonce
+					// Check if the left expression contains to any global and wp_verify_nonce
 					$leftContainsGetAndNonce = $this->containsGetOrVerifyNonce( $leftExpr );
-					// Check if the right expression contains $_GET and wp_verify_nonce
+					// Check if the right expression contains to any global and wp_verify_nonce
 					$rightContainsGetAndNonce = $this->containsGetOrVerifyNonce( $rightExpr );
 					if ( $leftContainsGetAndNonce && $rightContainsGetAndNonce ) {
-					// The condition contains $_GET, wp_verify_nonce, and an AND operator
+					// The condition contains to any global, wp_verify_nonce, and an AND operator
 						$this->return_value = 1;
 					} else {
 						$this->return_value = -1;
@@ -85,11 +86,11 @@ class CommonIssues extends NodeVisitorAbstract {
 				// Check if the function call has one argument
 				$argList = $expr->args;
 				if ( count( $argList ) === 1 ) {
-					// Check if the argument is $_GET
+					// Check if the argument is any global.
 					$argExpr = $argList[0]->value;
 					if ( $argExpr instanceof Node\Expr\ArrayDimFetch ) {
 						$varNode = $argExpr->var;
-						if ( $varNode instanceof Node\Expr\Variable && $varNode->name === '_GET' ) {
+						if ( $varNode instanceof Node\Expr\Variable && in_array( $varNode->name, $this->php_globals, true ) ) {
 							return true;
 						}
 					}
@@ -98,18 +99,18 @@ class CommonIssues extends NodeVisitorAbstract {
 		} elseif ( $expr instanceof Node\Expr\BooleanNot ) {
 			return $this->containsGetOrVerifyNonce( $expr->expr );
 		} elseif ( $expr instanceof Node\Expr\Assign && $expr->var instanceof Node\Expr\ArrayDimFetch ) {
-			// Check if the assignment is to $_GET
+			// Check if the assignment is to any global.
 			$varNode = $expr->var->var;
-			if ( $varNode instanceof Node\Expr\Variable && $varNode->name === '_GET' ) {
+			if ( $varNode instanceof Node\Expr\Variable && in_array( $varNode->name, $this->php_globals, true ) ) {
 				return true;
 			}
 		} elseif ( $expr instanceof Node\Expr\Isset_ ) {
-			// Check if the isset call has an argument that is $_GET
+			// Check if the isset call has an argument that is to any global.
 			$varNodes = $expr->vars;
 			foreach ( $varNodes as $varNode ) {
 				if ( $varNode instanceof Node\Expr\ArrayDimFetch ) {
 					$varNode = $varNode->var;
-					if ( $varNode instanceof Node\Expr\Variable && $varNode->name === '_GET' ) {
+					if ( $varNode instanceof Node\Expr\Variable && in_array( $varNode->name, $this->php_globals, true ) ) {
 						return true;
 					}
 				}
