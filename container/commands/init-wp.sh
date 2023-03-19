@@ -1,11 +1,11 @@
 #!/bin/bash
 
-CEBOLA_DOT_USER_DIR="~/.cebola"
+CEBOLA_DOT_USER_DIR="/root/.cebola"
 CEBOLA_PHP8_UPDATE_FILE="{$CEBOLA_DOT_USER_DIR}/php8-updated.lock"
 
 function cebolaPrepare() {
-  if [ ! -d "$CEBOLA_DOT_USER_DIR" ]; then
-    mkdir -p "$CEBOLA_DOT_USER_DIR"
+  if [ ! -d $CEBOLA_DOT_USER_DIR ]; then
+    mkdir $CEBOLA_DOT_USER_DIR
   fi
 }
 

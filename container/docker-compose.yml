@@ -3,25 +3,25 @@ version: '3.4'
 x-wp-core-volume:
   &wp_core
   type: bind
-  source: ./wp-data
+  source: "./wp-data"
   target: /var/www/html
 
 x-wp-core-addons:
   &wp_addons
   type: bind
-  source: ./addons
+  source: "../addons"
   target: /var/www/addons
 
 x-php-ini:
   &php_ini
   type: bind
-  source: ./config/php.conf.ini
+  source: "./config/php.conf.ini"
   target: /usr/local/etc/php/conf.d/conf.ini
 
 x-startup-commands:
   &commands
   type: bind
-  source: ./commands
+  source: "./commands"
   target: /usr/local/bin/commands
 
 networks:
@@ -41,14 +41,14 @@ services:
       MARIADB_DATABASE: "${DB_NAME}"
       MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
     healthcheck:
-      test: "/usr/bin/mysqladmin --password=${DB_ROOT_PASSWORD}"
+      test: "/usr/bin/mysqladmin ping --password=${DB_ROOT_PASSWORD}"
       timeout: 5s
       retries: 20
     networks:
       - cebola
 
   wpcore:
-    image: wordpress:php8.0-fpm
+    image: wordpress:php8.0-apache
     ports:
       - ${IP}:12080:80
     working_dir: /var/www/html
@@ -57,13 +57,11 @@ services:
       - *wp_core
       - *wp_addons
       - *commands
-    command: [ "/bin/sh" ,"-c", "/usr/local/bin/commands/init-wp.sh" ]
     environment:
       WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_NAME: "${DB_NAME}"
       WORDPRESS_DB_USER: root
       WORDPRESS_DB_PASSWORD: "${DB_ROOT_PASSWORD}"
-      WORDPRESS_DB_PORT: "${DB_PORT}"
       WORDPRESS_DEBUG: 1
     depends_on:
       - mariadb
@@ -71,19 +69,17 @@ services:
       - cebola
 
   wpcli:
-    image: wordpress:cli
-    tty: true
+    image: wordpress:cli-php8.0
     volumes:
       - *php_ini
       - *wp_core
       - *commands
+    entrypoint: [ "/bin/sh" ,"-c", "/usr/local/bin/commands/install-wordpress-core.sh" ]
     environment:
       WORDPRESS_DB_HOST: mariadb
       WORDPRESS_DB_NAME: "${DB_NAME}"
       WORDPRESS_DB_USER: root
       WORDPRESS_DB_PASSWORD: "${DB_ROOT_PASSWORD}"
-      WORDPRESS_DB_PORT: "${DB_PORT}"
-      WORDPRESS_DEBUG: 1
     depends_on:
       - mariadb
       - wpcore
