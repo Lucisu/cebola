@@ -26,11 +26,15 @@ class Parser {
 	}
 
 	private function parse() {
+
+		if ( empty( $this->code ) ) {
+			return;
+		}
+
 		$parser = ( new ParserFactory )->create( ParserFactory::PREFER_PHP7 );
 		try {
 			$ast = $parser->parse( $this->code );
-		} catch (Error $error) {
-			echo "Parse error: {$error->getMessage()}\n";
+		} catch ( Error $error ) {
 			return;
 		}
 
@@ -169,6 +173,19 @@ class Parser {
 			$attention += 5;
 		}
 
+		$parser = ( new ParserFactory )->create( ParserFactory::PREFER_PHP7 );
+		$ast    = $parser->parse( $this->code );
+
+		$traverser = new NodeTraverser();
+		$visitor   = new CommonIssues();
+		$traverser->addVisitor( $visitor );
+		$ast = $traverser->traverse( $ast );
+
+		$traverser->addVisitor( $visitor );
+		$ast = $traverser->traverse( $ast );
+
+		$common_issues = $visitor->getValue();
+
 		$calls = $this->get_calls();
 
 		foreach ( $this->functions as $key => $value ) {
@@ -176,6 +193,10 @@ class Parser {
 
 				$called = array_search( $function, array_column( $calls, 'name' ), true );
 				if ( false !== $called ) {
+
+					if ( ! empty( $value['common_issues'] ) && ! empty( $common_issues ) ) {
+						$attention += $common_issues * 5;
+					}
 
 					if ( 'nonces' === $key ) {
 						$nonce = '';
@@ -200,6 +221,7 @@ class Parser {
 					}
 
 					$attention += $value['value'];
+
 					if ( ! empty( $value['unique'] ) ) {
 						break;
 					}

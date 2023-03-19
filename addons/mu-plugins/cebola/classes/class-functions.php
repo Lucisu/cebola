@@ -11,9 +11,10 @@ class Functions {
 			),
 		),
 		'nonces'      => array(
-			'unique'    => true,
-			'value'     => -10,
-			'functions' => array(
+			'common_issues' => true,
+			'unique'        => true,
+			'value'         => -10,
+			'functions'     => array(
 				'wp_verify_nonce',
 				'check_admin_referer',
 				'check_ajax_referer',
@@ -48,8 +49,9 @@ class Functions {
 			),
 		),
 		'sensitive'   => array(
-			'value'     => 5,
-			'functions' => array(
+			'common_issues' => true,
+			'value'         => 5,
+			'functions'     => array(
 				'update_option',
 				'add_option',
 				'delete_option',
@@ -221,10 +223,12 @@ class Functions {
 				$interesting_hooks = array(
 					'admin_init'
 				);
+
+				$calls_functions = array_column( $parser->calls, 'name' );
 	
 				if (  str_starts_with( $hook_name, 'wp_ajax_' ) || in_array( $hook_name, $interesting_hooks, true ) ) {
 					$check_permissions = array_merge( $this->functions['nonces']['functions'], $this->functions['permissions']['functions'] );
-					if ( empty( $parser->calls ) || empty( array_intersect( $parser->calls, $check_permissions ) ) ) {
+					if ( empty( $calls_functions ) || empty( array_intersect( $calls_functions, $check_permissions ) ) ) {
 						$attention *= 1.5;
 	
 						$sensitive_functions = array_merge(
@@ -233,7 +237,7 @@ class Functions {
 							$this->functions['requests']['functions'],
 						);
 	
-						if ( ! empty( array_intersect( $parser->calls, $sensitive_functions ) ) ) {
+						if ( ! empty( array_intersect( $calls_functions, $sensitive_functions ) ) ) {
 							$attention *= 1.5;
 						}
 					}
