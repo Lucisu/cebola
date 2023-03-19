@@ -35,7 +35,6 @@ services:
       wp core install --path="/var/www/html" --url="http://localhost:8000" --title="CEBOLA" --admin_user=admin --admin_password=secret --admin_email=user@example.com;
       wp rewrite structure '/%postname%/';
       ln -s /var/www/addons/mu-plugins /var/www/html/wp-content;
-      ln -s /var/www/addons/report /var/www/html;
       tail -f /dev/null
       '
     depends_on:
