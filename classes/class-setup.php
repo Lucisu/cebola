@@ -151,7 +151,7 @@ class Setup {
 			\curl_close( $ch );
 			// phpcs:enable
 
-			if ( $httpcode >= 400 ) {
+			if ( ! str_contains( $url, 'wp-admin/admin-ajax.php' ) && $httpcode >= 400 ) {
 				Logger::error( sprintf( 'Something went wrong when accessing %s', $value ) );
 			}
 		}
