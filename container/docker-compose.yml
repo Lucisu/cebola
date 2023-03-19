@@ -9,12 +9,7 @@ services:
       - ./config/php.conf.ini:/usr/local/etc/php/conf.d/conf.ini
       - ./wp-data:/var/www/html
       - ../addons:/var/www/addons
-    user: 1000:1000
     environment:
-      WP_OWNER: '#1000'
-      WP_GROUP: '#1000'
-      APACHE_RUN_USER: '#1000'
-      APACHE_RUN_GROUP: '#1000'
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_NAME: "${DB_NAME}"
       WORDPRESS_DB_USER: root
@@ -66,12 +61,9 @@ services:
       '--character-set-server=utf8mb4',
       '--collation-server=utf8mb4_unicode_ci'
     ]
-    volumes:
-      - ./db-data:/var/lib/mysql
     environment:
       MYSQL_DATABASE: "${DB_NAME}"
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-    user: 1000:1000
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 5s
