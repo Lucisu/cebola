@@ -25,7 +25,7 @@ x-startup-commands:
   target: /usr/local/bin/commands
 
 networks:
-  default:
+  cebola:
     driver: bridge
 
 volumes:
@@ -37,8 +37,6 @@ services:
     restart: always
     ports:
       - ${IP}:12306:3306
-    volumes:
-      - ./db-data:/var/lib/mysql
     environment:
       MARIADB_DATABASE: "${DB_NAME}"
       MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
@@ -47,7 +45,8 @@ services:
       timeout: 5s
       retries: 20
     networks:
-      - default
+      - cebola
+
   wpcore:
     image: wordpress:php8.0-fpm
     ports:
@@ -69,7 +68,7 @@ services:
     depends_on:
       - mariadb
     networks:
-      - default
+      - cebola
 
   wpcli:
     image: wordpress:cli
@@ -89,7 +88,7 @@ services:
       - mariadb
       - wpcore
     networks:
-      - default
+      - cebola
 
   pma:
     image: phpmyadmin/phpmyadmin
@@ -101,4 +100,21 @@ services:
     ports:
       - ${IP}:12088:80
     networks:
-      - default
+      - cebola
+
+  mariadb-report:
+    image: mariadb
+    restart: always
+    ports:
+      - ${IP}:12307:3306
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      MARIADB_DATABASE: "${DB_NAME}"
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+    healthcheck:
+      test: "/usr/bin/mysqladmin --password=${DB_ROOT_PASSWORD}"
+      timeout: 5s
+      retries: 20
+    networks:
+      - cebola
