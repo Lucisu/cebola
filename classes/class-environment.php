@@ -54,12 +54,12 @@ class Environment {
 	public function stop_container() {
 		Logger::info( 'Stopping docker container...' );
 		echo "\n";
-		shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
+		shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
 	}
 
 	public function run_container() {
 		Logger::info( 'Starting docker container...' );
-		shell_exec( 'sh ' . CEBOLA_DIR . '/container/start.sh' );
+		shell_exec( 'bash ' . CEBOLA_DIR . '/container/start.sh' );
 		sleep( 5 );
 		$this->set_container();
 	}

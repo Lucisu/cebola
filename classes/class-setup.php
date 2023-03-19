@@ -63,12 +63,7 @@ class Setup {
 			}
 		}
 
-		$commands = array( 'composer', 'docker compose' );
-		foreach ( $commands as $key => $value ) {
-			if ( empty( shell_exec( 'which ' . $value ) ) ) {
-				Logger::error( sprintf( '%s is not available', $value ) );
-			}
-		}
+		
 	}
 
 	/**
