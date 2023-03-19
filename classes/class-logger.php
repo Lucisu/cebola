@@ -8,7 +8,7 @@ class Logger {
 	public $conn;
 
 	public static function print( $message = '', $color = '' ) {
-		if ( CEBOLA_VERBOSE < 1 ) {
+		if ( false === defined('CEBOLA_VERBOSE') || CEBOLA_VERBOSE < 1 ) {
 			return;
 		}
 		if ( empty( $color ) ) {

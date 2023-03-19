@@ -9,6 +9,7 @@ define( 'CEBOLA_WP_DIR', CEBOLA_CONTAINER_DIR . '/wp-data' );
 function init_cebola() {
 	require CEBOLA_DIR . '/classes/class-logger.php';
 	require CEBOLA_DIR . '/classes/class-setup.php';
+
 	new Classes\Setup();
 }
 

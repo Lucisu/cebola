@@ -4,7 +4,7 @@ namespace Cebola\Classes;
 
 class Environment {
 
-	const CONTAINER_NAME = 'container-wp-1';
+	const CONTAINER_NAME = 'container-wpcore-1';
 	private $variables   = array();
 
 	public function set_container() {
@@ -53,7 +53,7 @@ class Environment {
     // making sure the code below runs on Windows
 		if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
 			shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
-			
+
 		} else {
 			shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
 		}
@@ -61,13 +61,13 @@ class Environment {
 
 	public function run_container() {
 		Logger::info( 'Starting docker container...' );
-    // making sure the code below runs on Windows
+
 		if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
-			shell_exec( 'sh ' . CEBOLA_DIR . '/container/stop.sh' );
-			
+			shell_exec( 'sh ' . CEBOLA_DIR . '/container/start.sh' );
 		} else {
-			shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
+			shell_exec( 'bash ' . CEBOLA_DIR . '/container/start.sh' );
 		}
+
 		sleep( 5 );
 		$this->set_container();
 	}
@@ -86,7 +86,7 @@ class Environment {
 
 	public function set_plugin( string $plugin ) {
 		Logger::info( sprintf( 'Activating plugin %s...', $plugin ) );
-		$output = shell_exec( 'docker exec -it container-wpcli-1 sh -cx "wp plugin install ' . $plugin . ' --activate"' );
+		$output = shell_exec( 'docker exec container-wpcli-1 sh -cx "wp plugin install ' . $plugin . ' --activate"' );
 	}
 
 	private function set_constants() {

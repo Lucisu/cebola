@@ -32,6 +32,8 @@ class Setup {
 		require CEBOLA_DIR . '/classes/class-database.php';
 		require CEBOLA_DIR . '/classes/class-environment.php';
 
+        Logger::success('Staring WPHackCebola setup');
+
 		$this->parse_arguments();
 		$this->check_requirements();
 
@@ -40,7 +42,7 @@ class Setup {
 
 		$this->maybe_install();
 
-		Logger::success( 'Running on http://localhost:8000 (user:admin, password:secret)' );
+		Logger::success( 'WPHackCebola setup completed & running on http://localhost:12080 (user:admin, password:password)' );
 	}
 
 	/**
@@ -62,10 +64,10 @@ class Setup {
 				Logger::error( sprintf( '%s is not writable', $value ) );
 			}
 		}
-		
+
 		$commands = array( 'composer', 'docker' );
 		foreach ( $commands as $key => $value ) {
-			
+
 			if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
 				if ( empty( shell_exec( 'where ' . $value ) ) ) {
 					Logger::error( sprintf( '%s is not available', $value ) );
@@ -77,7 +79,7 @@ class Setup {
 				}
 			}
 		}
-		
+
 	}
 
 	/**
@@ -132,21 +134,20 @@ class Setup {
 	}
 
 	private function install() {
-		@rmdir( CEBOLA_WP_DIR );
 		$this->environment->set_container();
 		$this->database->connect();
 		$this->environment->install_dependencies();
-		$this->environment->set_wp_debug( $this->args['wp-debug'] );
+//		$this->environment->set_wp_debug( $this->args['wp-debug'] );
 		$this->environment->set_plugin( $this->args['plugin'] );
 		$this->database->install( $this->args['plugin'] );
 		$this->send_requests();
 	}
-    
+
 
 	private function send_requests() {
 		Logger::info( 'Sending initial requests...' );
 
-		$requests = array( 'http://localhost:8000', 'http://localhost:8000/index.php?rest_route=/' );
+		$requests = array( 'http://localhost:12080', 'http://localhost:12080/index.php?rest_route=/' );
 		foreach ( $requests as $key => $value ) {
 			// phpcs:disable
 			$url = $value;
