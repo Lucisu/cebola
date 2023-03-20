@@ -4,13 +4,13 @@ namespace Cebola\Classes;
 class Functions {
 
 	private $functions = array(
-		'permissions' => array(
+		'permissions'   => array(
 			'value'     => -5,
 			'functions' => array(
 				'current_user_can',
 			),
 		),
-		'nonces'      => array(
+		'nonces'        => array(
 			'common_issues' => true,
 			'unique'        => true,
 			'value'         => -10,
@@ -20,7 +20,7 @@ class Functions {
 				'check_ajax_referer',
 			),
 		),
-		'dangerous'   => array(
+		'dangerous'     => array(
 			'value'     => 25,
 			'functions' => array(
 				'eval',
@@ -32,7 +32,7 @@ class Functions {
 				'pcntl_exec',
 			),
 		),
-		'files'       => array(
+		'files'         => array(
 			'value'     => 5,
 			'functions' => array(
 				'file_get_contents',
@@ -40,7 +40,7 @@ class Functions {
 				'unlink',
 			),
 		),
-		'user'        => array(
+		'user'          => array(
 			'value'     => 5,
 			'functions' => array(
 				'add_user_meta',
@@ -48,7 +48,7 @@ class Functions {
 				'delete_user_meta',
 			),
 		),
-		'sensitive'   => array(
+		'sensitive'     => array(
 			'common_issues' => true,
 			'value'         => 5,
 			'functions'     => array(
@@ -57,7 +57,7 @@ class Functions {
 				'delete_option',
 			),
 		),
-		'posts'       => array(
+		'posts'         => array(
 			'value'     => 4,
 			'functions' => array(
 				'update_post_meta',
@@ -66,25 +66,32 @@ class Functions {
 				'wp_delete_post'
 			),
 		),
-		'mail'        => array(
+		'mail'          => array(
 			'value'     => 2,
 			'functions' => array(
 				'wp_mail',
 				'mail',
 			),
 		),
-		'redirects'   => array(
+		'redirects'     => array(
 			'value'     => 2,
 			'functions' => array(
 				'wp_redirect',
 			),
 		),
-		'requests'    => array(
+		'requests'      => array(
 			'value'     => 1,
 			'functions' => array(
 				'wp_remote_get',
 				'wp_remote_post',
 				'download_url',
+			),
+		),
+		'serialization' => array(
+			'value'     => 5,
+			'functions' => array(
+				'unserialize',
+				'maybe_unserialize',
 			),
 		),
 	);
