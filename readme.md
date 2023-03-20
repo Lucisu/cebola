@@ -30,8 +30,7 @@ Note: you may get the error that some packages are missing. In that case please 
 
 
 ```bash
-cd ./includes/cebola
-composer install
+./cebola --plugin example-plugin
 
 ## ABOUT THE PROJECT
 
