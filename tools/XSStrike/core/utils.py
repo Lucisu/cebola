@@ -157,7 +157,7 @@ def genGen(fillings, eFillings, lFillings, eventHandlers, tags, functions, ends,
                                         eventHandler) + eFilling + '=' + eFilling + function + lFilling + end + bait
                                     vectors.append(vector)
     random.shuffle( vectors )
-    return vectors[:50]
+    return vectors[:2]
 
 
 def getParams(url, data, GET):

@@ -211,6 +211,11 @@ class Functions {
 	}
 
 	public function register_nonce( $action ) {
+
+		if ( defined( 'CEBOLA_RUNNING_XSSTRIKE' ) && CEBOLA_RUNNING_XSSTRIKE ) {
+			return;
+		}
+
 		global $wpdb;
 
 		$added = $wpdb->get_row(
@@ -279,11 +284,15 @@ class Functions {
 				$callback_data = $data['args'][1];
 			}
 
-			$function = $this->get_function_body( $callback_data );
-
-			if ( false !== $function ) {
-				$parser = new Parser( $function, $this->functions );
+			try {
+				$function  = $this->get_function_body( $callback_data );
+				$parser    = new Parser( $function, $this->functions );
 				$attention = $parser->get_code_attention();
+			} catch (\Throwable $th) {
+				$parser = false;
+			}
+
+			if ( false !== $parser && false !== $function ) {
 	
 				$interesting_hooks = array(
 					'admin_init'

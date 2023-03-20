@@ -54,7 +54,7 @@ class Environment {
 	}
 
 	public function run_container() {
-		Logger::info( 'Starting docker container...' );
+		Logger::info( 'Starting docker container...' . "\n" );
 		shell_exec( 'sh ' . CEBOLA_CONTAINER_DIR . '/start.sh' );
 		sleep( 5 );
 		$this->set_container();
