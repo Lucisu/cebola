@@ -24,11 +24,13 @@ class Admin_Menu {
 	// Callback function to render the list table
 	public function cebola_functions_list_table_render() {
 
-		echo '<h1>Cebola Functions</h1>';
+		echo '<h1>Cebola Functions</h1><div style="padding-right: 20px;">';
 
 		$functions_list_table = new Cebola_Functions_List_Table();
 		$functions_list_table->prepare_items();
 		$functions_list_table->display();
+
+		echo '</div>';
 	}
 
 }

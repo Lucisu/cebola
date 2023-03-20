@@ -1,8 +1,8 @@
 <?php
 namespace Cebola;
 
-error_reporting( E_ALL );
-ini_set( 'display_errors', 1 );
+// error_reporting( E_ALL );
+// ini_set( 'display_errors', 1 );
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
@@ -29,14 +29,11 @@ function admin_header() {
 	}
 
 	echo '<style type="text/css">';
-	echo '.wp-list-table .column-cb { width: 2%; }';
-	echo '.wp-list-table .column-id { width: 3%; }';
-	echo '.wp-list-table .column-type { width: 5%; }';
-	echo '.wp-list-table .column-hook { width: 10%; }';
-	echo '.wp-list-table .column-callback { width: 20%; }';
+	echo '.wp-list-table .column-type-hook { width: 25%; }';
+	echo '.wp-list-table .column-callback { width: 15%; }';
 	echo '.wp-list-table .column-priority { width: 5%; }';
 	echo '.wp-list-table .column-arguments { width: 5%; }';
-	echo '.wp-list-table .column-file { width: 20%; }';
+	echo '.wp-list-table .column-file { width: 10%; }';
 	echo '.wp-list-table .column-line { width: 5%; }';
 	echo '.wp-list-table .column-attention { width: 5%; }';
 	echo '</style>';

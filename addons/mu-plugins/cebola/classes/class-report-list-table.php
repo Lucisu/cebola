@@ -23,15 +23,11 @@ class Cebola_Functions_List_Table extends \WP_List_Table {
 	// Define columns
 	public function get_columns() {
 		return array(
-			'cb'        => '<input type="checkbox" />',
-			'id'        => __( 'ID', 'mylisttable' ),
-			'type'      => __( 'Type', 'mylisttable' ),
-			'hook'      => __( 'Hook', 'mylisttable' ),
+			'type-hook' => __( 'Type & Hook', 'mylisttable' ),
 			'callback'  => __( 'Callback', 'mylisttable' ),
 			'priority'  => __( 'Priority', 'mylisttable' ),
 			'arguments' => __( 'Arguments', 'mylisttable' ),
 			'file'      => __( 'File', 'mylisttable' ),
-			'line'      => __( 'Line', 'mylisttable' ),
 			'attention' => __( 'Attention', 'mylisttable' ),
 		);
 	}
@@ -56,7 +52,7 @@ class Cebola_Functions_List_Table extends \WP_List_Table {
 
 		// Set table name and per page options
 		$table_name = 'cebola_functions';
-		$per_page   = 10;
+		$per_page   = 100;
 
 		// Define columns
 		$columns  = $this->get_columns();
@@ -68,7 +64,7 @@ class Cebola_Functions_List_Table extends \WP_List_Table {
 
 		// Define data
 		$data = $wpdb->get_results(
-			$wpdb->prepare( "SELECT * FROM $table_name ORDER BY id DESC LIMIT %d" . '', $per_page ),
+			$wpdb->prepare( "SELECT * FROM $table_name ORDER BY attention DESC LIMIT %d" . '', $per_page ),
 		);
 
 		// Define current page
@@ -93,16 +89,19 @@ class Cebola_Functions_List_Table extends \WP_List_Table {
 
 	function column_default( $item, $column_name ) {
 		switch ( $column_name ) {
-			case 'id':
-			case 'type':
-			case 'hook':
 			case 'callback':
 			case 'priority':
 			case 'arguments':
-			case 'file':
-			case 'line':
 			case 'attention':
 				return $item->$column_name;
+			case 'file':
+				// make a link to the plugin file editor
+				// http://localhost:8000/wp-admin/plugin-editor.php?plugin=gotowp%2Fgotowp_personal.php&Submit=Select
+				$plugin = str_replace( '/var/www/html/wp-content/plugins/', '', $item->$column_name );
+				$link   = admin_url( 'plugin-editor.php?plugin=' . $plugin );
+				return '<a href="' . $link . '">' . $plugin . ': ' . $item->line . '</a>';
+			case 'type-hook':
+				return 'add_' . $item->type . '( <strong>\'' . $item->hook . '\'</strong> )';
 			default:
 				return print_r( $item, true );
 
