@@ -95,8 +95,6 @@ class Cebola_Functions_List_Table extends \WP_List_Table {
 			case 'attention':
 				return $item->$column_name;
 			case 'file':
-				// make a link to the plugin file editor
-				// http://localhost:8000/wp-admin/plugin-editor.php?plugin=gotowp%2Fgotowp_personal.php&Submit=Select
 				$plugin = str_replace( '/var/www/html/wp-content/plugins/', '', $item->$column_name );
 				$link   = admin_url( 'plugin-editor.php?plugin=' . $plugin );
 				return '<a href="' . $link . '">' . $plugin . ': ' . $item->line . '</a>';
