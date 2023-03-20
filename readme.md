@@ -3,17 +3,17 @@
 
 ## ABOUT THE PROJECT
 
-We help you find vulnerability in your Wordpress plugins and themes.
+Designed to enhance your website’s security, WPHackCebola uses dynamic analysis to detect potential security vulnerabilities in WordPress installations running within containers.
+
+Inspired by the wpgarlic proof-of-concept article, we’ve taken our approach further by simulating bogus requests and identifying where they produce unexpected output.
 
 ***
 
 ## HOW IT WORKS
 
-By running the **Cebola scanner**, we are checking your plugins and themes provided in the command line and showing you
-some well known vulnerability nested there.
-We do that by creating a clean Wordpress instance, with the given plugin and adding our security expertise to get the
-week points and issues from it.
-We do that by using Docker containers to have up the full needed infrastructure and applying our scripts
+With our dynamic tool, you can test your website against vulnerabilities that may exist within your plugins.
+
+Our PHP command analyzes your plugin’s behavior and the data it accesses, including GET and POST parameters. We then inject our tool into your plugin’s cores, allowing us to intercept and retrieve data, send requests, and intercept function properties and return values. This helps us detect any unescaped output or leaked internal data, providing you with greater protection against potential security threats.
 
 ***
 
@@ -137,3 +137,8 @@ You can login with:
 
 - user: `admin`
 - password: `secret`
+
+
+Powered by
+
+![CODABLE](https://cdn.indystack.com/validatethewp/2023/03/codeable-io-logo-vector.svg)
