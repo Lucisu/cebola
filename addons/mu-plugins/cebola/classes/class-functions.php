@@ -4,13 +4,13 @@ namespace Cebola\Classes;
 class Functions {
 
 	private $functions = array(
-		'permissions' => array(
+		'permissions'   => array(
 			'value'     => -5,
 			'functions' => array(
 				'current_user_can',
 			),
 		),
-		'nonces'      => array(
+		'nonces'        => array(
 			'common_issues' => true,
 			'unique'        => true,
 			'value'         => -10,
@@ -20,7 +20,7 @@ class Functions {
 				'check_ajax_referer',
 			),
 		),
-		'dangerous'   => array(
+		'dangerous'     => array(
 			'value'     => 25,
 			'functions' => array(
 				'eval',
@@ -32,7 +32,7 @@ class Functions {
 				'pcntl_exec',
 			),
 		),
-		'files'       => array(
+		'files'         => array(
 			'value'     => 5,
 			'functions' => array(
 				'file_get_contents',
@@ -40,7 +40,7 @@ class Functions {
 				'unlink',
 			),
 		),
-		'user'        => array(
+		'user'          => array(
 			'value'     => 5,
 			'functions' => array(
 				'add_user_meta',
@@ -48,7 +48,7 @@ class Functions {
 				'delete_user_meta',
 			),
 		),
-		'sensitive'   => array(
+		'sensitive'     => array(
 			'common_issues' => true,
 			'value'         => 5,
 			'functions'     => array(
@@ -57,7 +57,7 @@ class Functions {
 				'delete_option',
 			),
 		),
-		'posts'       => array(
+		'posts'         => array(
 			'value'     => 4,
 			'functions' => array(
 				'update_post_meta',
@@ -66,25 +66,32 @@ class Functions {
 				'wp_delete_post'
 			),
 		),
-		'mail'        => array(
+		'mail'          => array(
 			'value'     => 2,
 			'functions' => array(
 				'wp_mail',
 				'mail',
 			),
 		),
-		'redirects'   => array(
+		'redirects'     => array(
 			'value'     => 2,
 			'functions' => array(
 				'wp_redirect',
 			),
 		),
-		'requests'    => array(
+		'requests'      => array(
 			'value'     => 1,
 			'functions' => array(
 				'wp_remote_get',
 				'wp_remote_post',
 				'download_url',
+			),
+		),
+		'serialization' => array(
+			'value'     => 5,
+			'functions' => array(
+				'unserialize',
+				'maybe_unserialize',
 			),
 		),
 	);
@@ -94,6 +101,7 @@ class Functions {
 	public function __construct() {
 		$this->hook_functions();
 		add_action( 'shutdown', array( $this, 'register_functions' ) );
+		add_action( 'shutdown', array( $this, 'run_tools' ) );
 	}
 
 	public function register_functions() {
@@ -104,6 +112,31 @@ class Functions {
 				$this->register_function( $function['data'], $function['type'], $function['hook_name'], $function['callback'], $function['priority'], $function['accepted_args'] );
 			}
 		}
+	}
+
+	public function run_tools() {
+		global $wpdb;
+
+		$urls       = '';
+		$parameters = array();
+
+		$saved_parameters = $wpdb->get_col(
+			'SELECT name FROM cebola_parameters',
+		);
+
+		foreach ( $saved_parameters as $key => $value ) {
+			$parameters[ $value ] = 'a';
+		}
+
+		$saved_urls = $wpdb->get_col(
+			'SELECT url FROM cebola_urls',
+		);
+
+		foreach ( $saved_urls as $key => $value ) {
+			$urls .= add_query_arg( $parameters, $value ) . "\n";
+		}
+
+		file_put_contents( WP_CONTENT_DIR . '/urls.txt', $urls );
 	}
 
 	private function hook_functions() {
@@ -178,6 +211,11 @@ class Functions {
 	}
 
 	public function register_nonce( $action ) {
+
+		if ( defined( 'CEBOLA_RUNNING_XSSTRIKE' ) && CEBOLA_RUNNING_XSSTRIKE ) {
+			return;
+		}
+
 		global $wpdb;
 
 		$added = $wpdb->get_row(
@@ -203,11 +241,7 @@ class Functions {
 
 		if ( empty( $url ) ) {
 			global $wp;
-			if ( empty( $wp ) ) {
-				$url = 'https://' . $_SERVER['HOST'] . $_SERVER['REQUEST_URI'];
-			} else {
-				$url = home_url( $wp->request );
-			}
+			$url = home_url( empty( $wp ) ? $_SERVER['REQUEST_URI'] : $wp->request );
 		}
 
 		global $wpdb;
@@ -250,11 +284,15 @@ class Functions {
 				$callback_data = $data['args'][1];
 			}
 
-			$function = $this->get_function_body( $callback_data );
-
-			if ( false !== $function ) {
-				$parser = new Parser( $function, $this->functions );
+			try {
+				$function  = $this->get_function_body( $callback_data );
+				$parser    = new Parser( $function, $this->functions );
 				$attention = $parser->get_code_attention();
+			} catch (\Throwable $th) {
+				$parser = false;
+			}
+
+			if ( false !== $parser && false !== $function ) {
 	
 				$interesting_hooks = array(
 					'admin_init'

@@ -132,6 +132,7 @@ class Setup {
 	}
 
 	private function install() {
+		@unlink( CEBOLA_DIR . '/container/wp-data/wp-content/urls.txt' );
 		@rmdir( CEBOLA_WP_DIR );
 		$this->environment->set_container();
 		$this->database->connect();
@@ -140,8 +141,9 @@ class Setup {
 		$this->environment->set_plugin( $this->args['plugin'] );
 		$this->database->install( $this->args['plugin'] );
 		$this->send_requests();
+		$this->run_tools();
+		$this->show_results();
 	}
-    
 
 	private function send_requests() {
 		Logger::info( 'Sending initial requests...' );
@@ -164,6 +166,37 @@ class Setup {
 				Logger::error( sprintf( 'Something went wrong when accessing %s', $value ) );
 			}
 		}
+	}
+
+	private function run_tools() {
+		Logger::info( 'Installing external tools...' );
+		$results = $this->database->query( 'INSERT INTO cebola_meta(`name`, `value`) VALUES ("running_tool", "xsstrike");' );
+
+		shell_exec( 'git clone https://github.com/s0md3v/XSStrike.git 2>/dev/null ' . CEBOLA_DIR . '/tools' );
+
+		Logger::info( 'Running external tools...' );
+
+		$urls_file = CEBOLA_DIR . '/container/wp-data/wp-content/urls.txt';
+
+		$urls = file_get_contents( $urls_file );
+		$urls = explode( "\n", $urls );
+		$urls = array_filter( $urls );
+		$urls = array_unique( $urls );
+
+		file_put_contents( CEBOLA_DIR . '/urls.txt', implode( "\n", $urls ) );
+
+		foreach ( $urls as $key => $value ) {
+			Logger::info( 'Running XSStrike ' . $key . '...' );
+			shell_exec( 'python3 ' . CEBOLA_DIR . '/tools/XSStrike/xsstrike.py --skip --file-log-level INFO -l 1 -t 10 --log-file ' . CEBOLA_DIR . '/xsstrike' . $key . '.log -u "' . $value . '"' );
+		}
+
+	}
+
+	private function show_results() {
+
+		$results = $this->database->query( 'SELECT * FROM `cebola_functions` ORDER BY attention DESC;' );
+
+		echo json_encode( $results, JSON_PRETTY_PRINT );
 
 	}
 

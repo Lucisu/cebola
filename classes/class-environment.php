@@ -60,6 +60,7 @@ class Environment {
 	}
 
 	public function run_container() {
+
 		Logger::info( 'Starting docker container...' );
     // making sure the code below runs on Windows
 		if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
@@ -68,6 +69,7 @@ class Environment {
 		} else {
 			shell_exec( 'bash ' . CEBOLA_DIR . '/container/stop.sh' );
 		}
+
 		sleep( 5 );
 		$this->set_container();
 	}
