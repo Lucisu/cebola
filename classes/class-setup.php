@@ -62,13 +62,22 @@ class Setup {
 				Logger::error( sprintf( '%s is not writable', $value ) );
 			}
 		}
-
-		$commands = array( 'composer', 'docker compose' );
+		
+		$commands = array( 'composer', 'docker', 'git', 'mysql', 'python3' );
 		foreach ( $commands as $key => $value ) {
-			if ( empty( shell_exec( 'which ' . $value ) ) ) {
-				Logger::error( sprintf( '%s is not available', $value ) );
+			
+			if ( strtoupper( substr( PHP_OS, 0, 3 ) ) === 'WIN' ) {
+				if ( empty( shell_exec( 'where ' . $value ) ) ) {
+					Logger::error( sprintf( '%s is not available', $value ) );
+				}
+			}
+			else{
+				if ( empty( shell_exec( 'which ' . $value ) ) ) {
+					Logger::error( sprintf( '%s is not available', $value ) );
+				}
 			}
 		}
+		
 	}
 
 	/**
