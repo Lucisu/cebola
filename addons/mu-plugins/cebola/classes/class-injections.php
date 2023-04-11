@@ -8,8 +8,9 @@ class Injections {
 	);
 
 	public function __construct() {
-		// Needed to manually access the API location http://localhost:8000/index.php?rest_route=/
 		$this->set_hooks();
+		$this->add_mocks();
+		add_action( 'init', array( $this, 'add_permissions' ), 1 );
 	}
 
 	private function set_hooks() {
@@ -25,6 +26,29 @@ class Injections {
 				}
 			}
 		);
+	}
+
+	public function add_mocks() {
+		// $_REQUEST = array_merge( $_GET, $_POST );
+		// $_POST    = new VariableMock( $_POST );
+		// $_GET     = new VariableMock( $_GET );
+		// $_REQUEST = new VariableMock( $_REQUEST );
+	}
+
+	public function add_permissions() {
+		if ( current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		
+		global $wpdb;
+		
+		$running = $wpdb->get_var( 'SELECT value FROM `cebola_meta` WHERE name = "xsstrike" ORDER BY id DESC LIMIT 1' );
+		if ( ! empty( $running ) && (int) $running > 1 ) {
+			define( 'CEBOLA_RUNNING_XSSTRIKE', $running );
+			wp_clear_auth_cookie();
+			wp_set_current_user ( 1 );
+			wp_set_auth_cookie  ( 1 );
+		}
 	}
 
 	public function add_report(  ) {

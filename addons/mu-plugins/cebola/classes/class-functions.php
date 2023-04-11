@@ -102,15 +102,12 @@ class Functions {
 		$this->hook_functions();
 		add_action( 'shutdown', array( $this, 'register_functions' ) );
 		add_action( 'shutdown', array( $this, 'run_tools' ) );
+		set_error_handler( array( $this, 'register_functions' ) );
 	}
 
 	public function register_functions() {
 		foreach ( $this->register as $key => $function ) {
-			if ( 'nonce' === $function['type'] ) {
-				$this->register_nonce( $function['action'] );
-			} else {
-				$this->register_function( $function['data'], $function['type'], $function['hook_name'], $function['callback'], $function['priority'], $function['accepted_args'] );
-			}
+			$this->register_function( $function['data'], $function['type'], $function['hook_name'], $function['callback'], $function['priority'], $function['accepted_args'] );
 		}
 	}
 
@@ -200,19 +197,57 @@ class Functions {
 				$is_plugin = is_cebola_plugin();
 				if ( $is_plugin ) {
 					$class->register_url();
-					$class->register[] = array(
-						'data'   => $is_plugin,
-						'type'   => 'nonce',
-						'action' => $action,
-					);
+					$class->register_nonce( $action );
 				}
 			}
+		);
+
+		uopz_set_return(
+			'wp_verify_nonce',
+			function( $value, $action ) use ( $class ) {
+				$is_plugin = is_cebola_plugin();
+
+				if ( $is_plugin ) {
+
+
+					global $wpdb;
+
+					$function = $wpdb->get_row(
+						$wpdb->prepare(
+							'SELECT id FROM cebola_functions WHERE file = %s AND line = %d',
+							$is_plugin['file'],
+							$is_plugin['line'],
+						)
+					);
+
+					if ( ! empty( $function ) ) {
+						$wpdb->query(
+							$wpdb->prepare(
+								'UPDATE cebola_functions SET attention = 1000 WHERE id = %d',
+								$function->id,
+							)
+						);
+					}
+
+					$added = $wpdb->get_row(
+						$wpdb->prepare(
+							'SELECT id FROM cebola_nonces WHERE action = %s',
+							$action,
+						)
+					);
+
+					if ( ! empty( $added ) ) {
+						return true;
+					}
+				}
+			},
+			true
 		);
 	}
 
 	public function register_nonce( $action ) {
 
-		if ( defined( 'CEBOLA_RUNNING_XSSTRIKE' ) && CEBOLA_RUNNING_XSSTRIKE ) {
+		if ( current_user_can( 'manage_options' ) ) {
 			return;
 		}
 

@@ -141,27 +141,33 @@ class Setup {
 
 		$requests = array( 'http://localhost:8000', 'http://localhost:8000/wp-admin/admin-ajax.php', 'http://localhost:8000/index.php?rest_route=/' );
 		foreach ( $requests as $key => $value ) {
-			// phpcs:disable
-			$url = $value;
-			$ch  = \curl_init( $url );
-			\curl_setopt( $ch, CURLOPT_HEADER, true );
-			\curl_setopt( $ch, CURLOPT_NOBODY, true );
-			\curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-			\curl_setopt( $ch, CURLOPT_TIMEOUT, 10 );
-			\curl_exec( $ch );
+			$ch       = $this->http_request( $value, false );
 			$httpcode = \curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 			\curl_close( $ch );
-			// phpcs:enable
-
-			if ( ! str_contains( $url, 'wp-admin/admin-ajax.php' ) && $httpcode >= 400 ) {
+			if ( ! str_contains( $value, 'wp-admin/admin-ajax.php' ) && $httpcode >= 400 ) {
 				Logger::error( sprintf( 'Something went wrong when accessing %s', $value ) );
 			}
 		}
 	}
 
-	private function run_tools() {
+	private function http_request( $url, $close = true ) {
+		// phpcs:disable
+		$ch  = \curl_init( $url );
+		\curl_setopt( $ch, CURLOPT_HEADER, true );
+		\curl_setopt( $ch, CURLOPT_NOBODY, true );
+		\curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		\curl_setopt( $ch, CURLOPT_TIMEOUT, 10 );
+		\curl_exec( $ch );
+		if ( $close ) {
+			\curl_close( $ch );
+		}
+		// phpcs:enable
+		return $ch;
+	}
+
+	private function run_tools( $step = 1 ) {
 		Logger::info( 'Installing external tools...' );
-		$results = $this->database->query( 'INSERT INTO cebola_meta(`name`, `value`) VALUES ("running_tool", "xsstrike");' );
+		$this->database->query( 'INSERT INTO cebola_meta(`name`, `value`) VALUES ("xsstrike", "' . (int) $step . '");' );
 
 		shell_exec( 'git clone https://github.com/s0md3v/XSStrike.git 2>/dev/null ' . CEBOLA_DIR . '/tools' );
 
@@ -174,21 +180,56 @@ class Setup {
 		$urls = array_filter( $urls );
 		$urls = array_unique( $urls );
 
+		$urls = array_filter(
+			$urls,
+			function( $value ) use ( $urls ) {
+				return in_array( $value . '/', $urls, true );
+			}
+		);
+
 		file_put_contents( CEBOLA_DIR . '/urls.txt', implode( "\n", $urls ) );
 
 		foreach ( $urls as $key => $value ) {
-			Logger::info( 'Running XSStrike ' . $key . '...' );
-			shell_exec( 'python3 ' . CEBOLA_DIR . '/tools/XSStrike/xsstrike.py --skip --file-log-level INFO -l 1 -t 10 --log-file ' . CEBOLA_DIR . '/xsstrike' . $key . '.log -u "' . $value . '"' );
+			Logger::info( 'Requesting ' . strtok( $value, '?' ) . ' with parameters...' );
+
+			$this->http_request( $value );
+
+			Logger::info( 'Running XSStrike ' . ( (int) $key + 1 ) . '...' );
+
+			$log_file = CEBOLA_DIR . '/xsstrike' . $key . '.log';
+
+			@unlink( $log_file );
+
+			// shell_exec( 'python3 ' . CEBOLA_DIR . '/tools/XSStrike/xsstrike.py --skip --file-log-level VULN -l 1 -t 20 --log-file ' . $log_file . ' -u "' . $value . '"' );
+
+			if ( file_exists( $log_file ) ) {
+				$report = file_get_contents( $log_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				if ( ! empty( trim( $report ) ) ) {
+					Logger::success( 'XSS Found:' );
+					echo $report; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				}
+			}
+		}
+
+		if ( 1 === $step ) {
+			Logger::info( 'Entering in authenticated mode...' );
+			$this->run_tools( 2 );
 		}
 
 	}
 
 	private function show_results() {
+		echo "\n";
+		Logger::success( 'Results (LIMIT 5):' );
+		echo "\n";
+		$results = mysqli_fetch_all( $this->database->query( 'SELECT * FROM `cebola_functions` ORDER BY attention DESC LIMIT 5;' ), MYSQLI_ASSOC ); // phpcs:ignore WordPress.DB.RestrictedFunctions.mysql_mysqli_fetch_all
 
-		$results = $this->database->query( 'SELECT * FROM `cebola_functions` ORDER BY attention DESC;' );
-
-		echo json_encode( $results, JSON_PRETTY_PRINT );
-
+		$mask = "| %20.20s | %45.45s | %70.70s | %9.9s |\n";
+		printf( $mask, 'Hook', 'File', 'Callback', 'Attention' );
+		foreach ( $results as $key => $value ) {
+			printf( $mask, $value['hook'], basename( $value['file'] ), $value['callback'], $value['attention'] );
+		}
+		echo "\n";
 	}
 
 	/**

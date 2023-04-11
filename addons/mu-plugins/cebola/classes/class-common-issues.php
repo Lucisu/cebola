@@ -179,7 +179,7 @@ class CommonIssues extends NodeVisitorAbstract {
 			} elseif ( $found_var ) {
 				// If it found a variable instead, return 1.
 				return 1;
-			} else {
+			} elseif ( ! empty( $arg ) ) {
 				// Else recursive through the function again.
 				return $this->checkIfValueIsFunctionSecondLevel( $arg );
 			}
