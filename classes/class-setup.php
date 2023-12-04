@@ -88,7 +88,7 @@ class Setup {
 
 		$defaults = array(
 			'wp-debug' => true,
-			'v'        => 1,
+			'v'        => 2,
 			'fresh'    => isset( $options['fresh'] ),
 		);
 
@@ -175,17 +175,21 @@ class Setup {
 
 		$urls_file = CEBOLA_DIR . '/container/wp-data/wp-content/urls.txt';
 
-		$urls = file_get_contents( $urls_file );
-		$urls = explode( "\n", $urls );
-		$urls = array_filter( $urls );
-		$urls = array_unique( $urls );
+		if ( file_exists( $urls_file ) ) {
+			$urls = file_get_contents( $urls_file );
+			$urls = explode( "\n", $urls );
+			$urls = array_filter( $urls );
+			$urls = array_unique( $urls );
 
-		$urls = array_filter(
-			$urls,
-			function( $value ) use ( $urls ) {
-				return in_array( $value . '/', $urls, true );
-			}
-		);
+			$urls = array_filter(
+				$urls,
+				function( $value ) use ( $urls ) {
+					return in_array( $value . '/', $urls, true );
+				}
+			);
+		} else {
+			$urls = array();
+		}
 
 		file_put_contents( CEBOLA_DIR . '/urls.txt', implode( "\n", $urls ) );
 

@@ -237,9 +237,11 @@ class Functions {
 					);
 
 					if ( ! empty( $added ) ) {
-						return true;
+						return 1; // 1 if the nonce is valid and generated between 0-12 hours ago, 2 if the nonce is valid and generated between 12-24 hours ago.
 					}
 				}
+
+				return wp_verify_nonce( $value, $action );
 			},
 			true
 		);

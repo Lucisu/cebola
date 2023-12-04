@@ -83,7 +83,7 @@ class Parser {
 			}
 
 			$calls[] = array(
-				'name' => $func->name->parts[0],
+				'name' => ! empty( $func->name->parts ) ? $func->name->parts[0] : $func->name,
 				'args' => $args,
 			);
 
