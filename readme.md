@@ -1,3 +1,9 @@
+# DEPRECATED
+
+I have started a more robust project with a different structure that produces way better results. It will be published soon.
+
+---
+
 Installation
 ============
 
